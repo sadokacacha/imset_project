@@ -1,0 +1,8 @@
+Django                        
+django-cors-headers           
+djangorestframework           
+djangorestframework-simplejwt 
+pillow 
+psycopg2-binary
+PyJWT
+sqlparse

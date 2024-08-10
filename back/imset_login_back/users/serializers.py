@@ -2,6 +2,9 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from django.contrib.auth import authenticate
+from .models import UploadedFile
+
+import os
 
 User = get_user_model()
 
@@ -43,4 +46,10 @@ class UserSerializer(serializers.ModelSerializer):
         if picture:
             user.picture = picture
             user.save()
+
         return user
+    
+class UploadedFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UploadedFile
+        fields = ['id', 'file', 'uploaded_at']

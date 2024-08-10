@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+import uuid
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -37,3 +40,14 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+
+
+class UploadedFile(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='uploads/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.file.name} uploaded by {self.user}"
