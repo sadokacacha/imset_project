@@ -35,9 +35,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     picture = serializers.ImageField(required=False)
+    
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'first_name', 'last_name', 'password', 'date_of_birth', 'id_card_or_passport', 'phone', 'picture']
+        fields = ['id', 'email', 'role', 'first_name', 'last_name', 'password', 'date_of_birth', 'id_card_or_passport', 'phone', 'picture']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -48,7 +49,6 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
 
         return user
-    
 class UploadedFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UploadedFile

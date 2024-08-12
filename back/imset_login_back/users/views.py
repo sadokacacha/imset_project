@@ -9,6 +9,7 @@ from .models import UploadedFile
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse, Http404
 from django.utils.encoding import smart_str
+from django.db import IntegrityError
 
 import logging
 
@@ -36,8 +37,9 @@ class AdminDashboardView(APIView):
     def get(self, request, *args, **kwargs):
         if request.user.role != 'admin':
             return Response({'error': 'You do not have permission to access this resource.'}, status=403)
-        teachers = User.objects.filter(role='teacher').values('id', 'username', 'email')
-        students = User.objects.filter(role='student').values('id', 'username', 'email')
+        teachers = User.objects.filter(role='teacher').values('id', 'email', 'first_name', 'last_name')
+        students = User.objects.filter(role='student').values('id', 'email', 'first_name', 'last_name')
+
         return Response({'teachers': list(teachers), 'students': list(students)})
 
 
@@ -63,21 +65,50 @@ logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
+
 class UserCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         if request.user.role != 'admin':
             return Response({'error': 'You do not have permission to access this resource.'}, status=403)
+        
+        try:
+            serializer = UserSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=201)
+            return Response({'errors': serializer.errors}, status=400)
+        except IntegrityError as e:
+            if 'users_user_username_key' in str(e):
+                return Response({'error': 'Username already exists. Please choose a different username.'}, status=400)
+            return Response({'error': 'An error occurred while creating the user.'}, status=500)
 
-        logger.debug(f"Request data: {request.data}")
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        logger.error(f"Serializer errors: {serializer.errors}")
-        return Response(serializer.errors, status=400)
-    
+
+class UserDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, user_id, *args, **kwargs):
+        if request.user.role != 'admin':
+            return Response({'error': 'You do not have permission to access this resource.'}, status=403)
+        
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+            return Response({'message': 'User deleted successfully'}, status=200)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=404)
+
+
+
+
+
+
+
+
+
+
+
 
 class TeacherFileUploadView(APIView):
     permission_classes = [IsAuthenticated]

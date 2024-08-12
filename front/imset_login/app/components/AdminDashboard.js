@@ -9,7 +9,6 @@ const AdminDashboard = () => {
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
   const [newUser, setNewUser] = useState({
-    username: '',
     email: '',
     role: '',
     password: '',
@@ -21,23 +20,52 @@ const AdminDashboard = () => {
     picture: null,
   });
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const accessToken = Cookies.get('access_token');
-        const response = await axios.get(
-          'http://localhost:8000/api/admin/dashboard/',
-          {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }
-        );
-        setTeachers(response.data.teachers);
-        setStudents(response.data.students);
-      } catch (error) {
-        console.error('Failed to fetch dashboard data', error);
-      }
-    };
+  const fetchDashboardData = async () => {
+    try {
+      const accessToken = Cookies.get('access_token');
+      const response = await axios.get(
+        'http://localhost:8000/api/admin/dashboard/',
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      setTeachers(response.data.teachers);
+      setStudents(response.data.students);
+    } catch (error) {
+      console.error('Failed to fetch dashboard data', error);
+    }
+  };
 
+  const deleteUser = async (userId) => {
+    try {
+      const accessToken = Cookies.get('access_token');
+      await axios.delete(
+        `http://localhost:8000/api/admin/delete-user/${userId}/`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      fetchDashboardData(); // Refresh the data after deletion
+    } catch (error) {
+      console.error('Failed to delete user', error);
+    }
+  };
+
+  const refreshToken = async () => {
+    try {
+      const response = await axios.post(
+        'http://localhost:8000/api/token/refresh/',
+        {
+          refresh: Cookies.get('refresh_token'),
+        }
+      );
+      Cookies.set('access_token', response.data.access);
+    } catch (error) {
+      console.error('Failed to refresh token', error);
+    }
+  };
+
+  useEffect(() => {
     if (user && user.role === 'admin') {
       fetchDashboardData();
     }
@@ -55,16 +83,20 @@ const AdminDashboard = () => {
   const createUser = async (e) => {
     e.preventDefault();
     try {
-      const accessToken = Cookies.get('access_token');
+      let accessToken = Cookies.get('access_token');
+
+      // Attempt to refresh the token if needed
+      if (!accessToken) {
+        await refreshToken();
+        accessToken = Cookies.get('access_token');
+      }
+
       const formData = new FormData();
       Object.keys(newUser).forEach((key) => {
-        formData.append(key, newUser[key]);
+        if (newUser[key]) {
+          formData.append(key, newUser[key]);
+        }
       });
-
-      // Log formData content for debugging
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
 
       await axios.post(
         'http://localhost:8000/api/admin/create-user/',
@@ -77,11 +109,8 @@ const AdminDashboard = () => {
         }
       );
 
-      // Refetch the dashboard data to update the list
       fetchDashboardData();
-      // Reset the form
       setNewUser({
-        username: '',
         email: '',
         role: '',
         password: '',
@@ -93,7 +122,14 @@ const AdminDashboard = () => {
         picture: null,
       });
     } catch (error) {
-      console.error('Failed to create user', error);
+      if (error.response) {
+        console.error('Failed to create user', error.response.data);
+        alert(
+          JSON.stringify(error.response.data.errors || error.response.data)
+        );
+      } else {
+        console.error('Failed to create user', error);
+      }
     }
   };
 
@@ -103,13 +139,15 @@ const AdminDashboard = () => {
 
   return (
     <div>
-      Welcome to the Admin Dashboard, {user && user.username}
+      Welcome to the Admin Dashboard, {user && user.first_name}{' '}
+      {user && user.last_name}
       <h1>Admin Dashboard</h1>
       <h2>Teachers</h2>
       <ul>
         {teachers.map((teacher) => (
           <li key={teacher.id}>
-            {teacher.username} - {teacher.email}
+            {teacher.first_name} {teacher.last_name} - {teacher.email}
+            <button onClick={() => deleteUser(teacher.id)}>Delete</button>
           </li>
         ))}
       </ul>
@@ -117,19 +155,13 @@ const AdminDashboard = () => {
       <ul>
         {students.map((student) => (
           <li key={student.id}>
-            {student.username} - {student.email}
+            {student.first_name} {student.last_name} - {student.email}
+            <button onClick={() => deleteUser(student.id)}>Delete</button>
           </li>
         ))}
       </ul>
       <h2>Add New User</h2>
       <form onSubmit={createUser}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={newUser.username}
-          onChange={handleChange}
-        />
         <input
           type="email"
           name="email"
