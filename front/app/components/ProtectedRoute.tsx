@@ -14,18 +14,19 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   role,
   children,
-  unauthorizedPath = '/login',
+  unauthorizedPath = '/',
 }) => {
   const { user, setUser } = useContext(AuthContext) as AuthContextType;
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const token = Cookies.get('access_token');
         if (!token) {
-          router.push('/login');
+          setIsAuthorized(false);
           return;
         }
 
@@ -34,25 +35,34 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         });
 
         setUser(response.data);
+
+        if (response.data.role === role) {
+          setIsAuthorized(true);
+        } else {
+          setIsAuthorized(false);
+        }
       } catch (error) {
         console.error(error);
-        router.push('/login');
+        setIsAuthorized(false);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchUser();
-  }, [setUser, router]);
+  }, [setUser, router, role]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user || !isAuthorized) {
+        router.push(unauthorizedPath);
+      }
+    }
+  }, [isLoading, user, isAuthorized, router, unauthorizedPath]);
 
   if (isLoading) return <div>Loading...</div>;
 
-  if (!user || user.role !== role) {
-    router.push(unauthorizedPath);
-    return null;
-  }
-
-  return <>{children}</>;
+  return isAuthorized ? <>{children}</> : null;
 };
 
 export default ProtectedRoute;

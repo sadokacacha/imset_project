@@ -5,14 +5,15 @@ import { AxiosError } from 'axios';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 
-
+// Define the User and AuthContextType interfaces
 export interface User {
   id: number;
   role: string;
-  first_name: string;  
-  last_name: string;  
-  email: string;       
+  first_name: string;
+  last_name: string;
+  email: string;
 }
+
 export interface AuthContextType {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
@@ -21,43 +22,55 @@ export interface AuthContextType {
   logout: () => void;
 }
 
+// Create the AuthContext
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
+// AuthProvider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
-const login = async (credentials: { email: string; password: string }) => {
-  try {
-    const response = await axios.post(
-      'http://localhost:8000/api/token/',
-      credentials
-    );
-    const { access } = response.data;
-    Cookies.set('access_token', access);
+  // Define the login function
+  const login = async (credentials: { email: string; password: string }) => {
+    try {
+      const response = await axios.post(
+        'http://localhost:8000/api/token/',
+        credentials
+      );
+      const { access } = response.data;
+      Cookies.set('access_token', access);
 
-    const userResponse = await axios.get<User>(
-      'http://localhost:8000/api/user/',
-      {
-        headers: { Authorization: `Bearer ${access}` },
+      const userResponse = await axios.get<User>(
+        'http://localhost:8000/api/user/',
+        {
+          headers: { Authorization: `Bearer ${access}` },
+        }
+      );
+      setUser(userResponse.data);
+
+      // Redirect based on role
+      const userRole = userResponse.data.role;
+      if (userRole === 'admin') {
+        router.push('/admin/dashboard');
+      } else if (userRole === 'teacher') {
+        router.push('/teacher/dashboard');
+      } else if (userRole === 'student') {
+        router.push('/student/dashboard');
       }
-    );
-    setUser(userResponse.data);
-    router.push('/');
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('Login failed', error.response?.data);
-    } else {
-      console.error('An unexpected error occurred', error);
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        console.error('Login failed', error.response?.data);
+      } else {
+        console.error('An unexpected error occurred', error);
+      }
+      throw error;
     }
-    throw error; // Rethrow the error if necessary
-  }
-};
+  };
 
   useEffect(() => {
     const checkAuth = async () => {

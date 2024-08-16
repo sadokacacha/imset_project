@@ -1,11 +1,11 @@
-// components/Layout.tsx
 'use client';
+
 import Link from 'next/link';
 import AuthContext, { AuthContextType } from '../context/AuthContext';
-import { useContext, ReactNode } from 'react';
+import { useContext } from 'react';
 
 interface LayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -39,7 +39,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </>
             ) : (
               <li>
-                <Link href="/login">Login</Link>
+                <Link href="/">Login</Link>{' '}
               </li>
             )}
           </ul>
