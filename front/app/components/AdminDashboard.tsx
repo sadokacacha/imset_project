@@ -1,8 +1,14 @@
 'use client';
+
 import { useContext, useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import AuthContext, { AuthContextType, User } from '../context/AuthContext';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+
+interface ClassName {
+  id: number;
+  name: string;
+}
 
 interface NewUser {
   email: string;
@@ -14,12 +20,15 @@ interface NewUser {
   id_card_or_passport: string;
   phone: string;
   picture: File | null;
+  classes_name: number[]; // For teachers, array of class IDs
+  class_name: number | ''; // For students, a single class ID
 }
 
 const AdminDashboard: React.FC = () => {
   const { user } = useContext(AuthContext) as AuthContextType;
   const [teachers, setTeachers] = useState<User[]>([]);
   const [students, setStudents] = useState<User[]>([]);
+  const [classes, setClasses] = useState<ClassName[]>([]); // Fetch classes
   const [newUser, setNewUser] = useState<NewUser>({
     email: '',
     role: '',
@@ -30,19 +39,26 @@ const AdminDashboard: React.FC = () => {
     id_card_or_passport: '',
     phone: '',
     picture: null,
+    classes_name: [],
+    class_name: '',
   });
 
+  // Fetch the dashboard data and classes
   const fetchDashboardData = async () => {
     try {
       const accessToken = Cookies.get('access_token');
-      const response = await axios.get(
-        'http://localhost:8000/api/admin/dashboard/',
-        {
+      const [dashboardResponse, classesResponse] = await Promise.all([
+        axios.get('http://localhost:8000/api/admin/dashboard/', {
           headers: { Authorization: `Bearer ${accessToken}` },
-        }
-      );
-      setTeachers(response.data.teachers);
-      setStudents(response.data.students);
+        }),
+        axios.get('http://localhost:8000/api/classes/', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      ]);
+
+      setTeachers(dashboardResponse.data.teachers || []);
+      setStudents(dashboardResponse.data.students || []);
+      setClasses(classesResponse.data || []); // Store classes data
     } catch (error) {
       console.error('Failed to fetch dashboard data', error);
     }
@@ -63,26 +79,6 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const refreshToken = async () => {
-    try {
-      const response = await axios.post(
-        'http://localhost:8000/api/token/refresh/',
-        {
-          refresh: Cookies.get('refresh_token'),
-        }
-      );
-      Cookies.set('access_token', response.data.access);
-    } catch (error) {
-      console.error('Failed to refresh token', error);
-    }
-  };
-
-  useEffect(() => {
-    if (user && user.role === 'admin') {
-      fetchDashboardData();
-    }
-  }, [user]);
-
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -90,6 +86,12 @@ const AdminDashboard: React.FC = () => {
       HTMLSelectElement;
     if (name === 'picture' && files) {
       setNewUser({ ...newUser, picture: files[0] });
+    } else if (name === 'classes_name') {
+      const selectedOptions = Array.from(
+        (e.target as HTMLSelectElement).selectedOptions,
+        (option) => parseInt(option.value)
+      );
+      setNewUser({ ...newUser, classes_name: selectedOptions });
     } else {
       setNewUser({ ...newUser, [name]: value });
     }
@@ -98,18 +100,14 @@ const AdminDashboard: React.FC = () => {
   const createUser = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      let accessToken = Cookies.get('access_token');
-
-      // Attempt to refresh the token if needed
-      if (!accessToken) {
-        await refreshToken();
-        accessToken = Cookies.get('access_token');
-      }
+      const accessToken = Cookies.get('access_token');
 
       const formData = new FormData();
       Object.keys(newUser).forEach((key) => {
         const value = newUser[key as keyof NewUser];
-        if (value) {
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v.toString()));
+        } else if (value) {
           formData.append(key, value as string | Blob);
         }
       });
@@ -136,6 +134,8 @@ const AdminDashboard: React.FC = () => {
         id_card_or_passport: '',
         phone: '',
         picture: null,
+        classes_name: [],
+        class_name: '',
       });
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -149,14 +149,23 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (user && user.role === 'admin') {
+      fetchDashboardData();
+    }
+  }, [user]);
+
   if (!user || user.role !== 'admin') {
     return <p>Access Denied</p>;
   }
 
   return (
     <div>
-      Welcome to the Admin Dashboard, {user?.first_name} {user?.last_name}
       <h1>Admin Dashboard</h1>
+      <p>
+        Welcome, {user?.first_name} {user?.last_name}
+      </p>
+
       <h2>Teachers</h2>
       <ul>
         {teachers.map((teacher) => (
@@ -166,6 +175,7 @@ const AdminDashboard: React.FC = () => {
           </li>
         ))}
       </ul>
+
       <h2>Students</h2>
       <ul>
         {students.map((student) => (
@@ -175,6 +185,7 @@ const AdminDashboard: React.FC = () => {
           </li>
         ))}
       </ul>
+
       <h2>Add New User</h2>
       <form onSubmit={createUser}>
         <input
@@ -184,13 +195,12 @@ const AdminDashboard: React.FC = () => {
           value={newUser.email}
           onChange={handleChange}
         />
-        <input
-          type="text"
-          name="role"
-          placeholder="Role (admin/teacher/student)"
-          value={newUser.role}
-          onChange={handleChange}
-        />
+        <select name="role" value={newUser.role} onChange={handleChange}>
+          <option value="">Select Role</option>
+          <option value="admin">Admin</option>
+          <option value="teacher">Teacher</option>
+          <option value="student">Student</option>
+        </select>
         <input
           type="password"
           name="password"
@@ -233,6 +243,41 @@ const AdminDashboard: React.FC = () => {
           onChange={handleChange}
         />
         <input type="file" name="picture" onChange={handleChange} />
+
+        {(newUser.role === 'teacher' || newUser.role === 'student') &&
+          classes.length > 0 && (
+            <>
+              {newUser.role === 'teacher' && (
+                <select
+                  name="classes_name"
+                  multiple
+                  value={newUser.classes_name.map(String)}
+                  onChange={handleChange}
+                >
+                  {classes.map((className) => (
+                    <option key={className.id} value={className.id.toString()}>
+                      {className.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {newUser.role === 'student' && (
+                <select
+                  name="class_name"
+                  value={newUser.class_name.toString()}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Class</option>
+                  {classes.map((className) => (
+                    <option key={className.id} value={className.id.toString()}>
+                      {className.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </>
+          )}
         <button type="submit">Add User</button>
       </form>
     </div>

@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from django.contrib.auth import get_user_model
-from .serializers import CustomTokenObtainPairSerializer , UserSerializer  , UploadedFileSerializer
-from .models import UploadedFile
+from .serializers import CustomTokenObtainPairSerializer , UserSerializer  , UploadedFileSerializer , ClassNameSerializer
+from .models import UploadedFile , ClassName
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse, Http404
 from django.utils.encoding import smart_str
@@ -43,6 +43,17 @@ class AdminDashboardView(APIView):
         return Response({'teachers': list(teachers), 'students': list(students)})
 
 
+class ClassListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        classes = ClassName.objects.all()
+        serializer = ClassNameSerializer(classes, many=True)
+        return Response(serializer.data)
+
+
+
+
 class TeacherDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -72,7 +83,7 @@ class UserCreateView(APIView):
     def post(self, request, *args, **kwargs):
         if request.user.role != 'admin':
             return Response({'error': 'You do not have permission to access this resource.'}, status=403)
-        
+
         try:
             serializer = UserSerializer(data=request.data)
             if serializer.is_valid():
@@ -80,8 +91,6 @@ class UserCreateView(APIView):
                 return Response(serializer.data, status=201)
             return Response({'errors': serializer.errors}, status=400)
         except IntegrityError as e:
-            if 'users_user_username_key' in str(e):
-                return Response({'error': 'Username already exists. Please choose a different username.'}, status=400)
             return Response({'error': 'An error occurred while creating the user.'}, status=500)
 
 

@@ -20,6 +20,13 @@ class UserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
+
+class ClassName(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 class User(AbstractUser):
     ROLES = (
         ('admin', 'Admin'),
@@ -33,7 +40,8 @@ class User(AbstractUser):
     id_card_or_passport = models.CharField(max_length=100, null=True, blank=True)
     phone = models.CharField(max_length=15, null=True, blank=True)
     picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
-
+    classes_name = models.ManyToManyField(ClassName, blank=True, related_name='teachers')
+    class_name = models.ForeignKey(ClassName, null=True, blank=True, related_name='students', on_delete=models.SET_NULL)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']  # Make first_name and last_name required
 

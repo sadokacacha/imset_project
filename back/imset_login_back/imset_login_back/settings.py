@@ -109,9 +109,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",  
 ]
 
-CORS_ALLOW_HEADERS = [
+CORS_ALLOW_HEADERS =  [
     'authorization',
     'content-type',
+    'X-CSRFToken',
 ]
 
 CORS_ALLOW_METHODS = [
@@ -124,7 +125,7 @@ CORS_ALLOW_METHODS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-
+CORS_ALLOW_ALL_ORIGINS = True 
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

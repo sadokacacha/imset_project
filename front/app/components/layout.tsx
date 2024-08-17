@@ -38,8 +38,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </li>
               </>
             ) : (
-              <li>
-                <Link href="/">Login</Link>{' '}
+              <li >
+                <Link  href="/"></Link>{' '}
               </li>
             )}
           </ul>
