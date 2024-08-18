@@ -78,16 +78,12 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class UploadedFileSerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField()
     fileType = serializers.SerializerMethodField()
-    classes = ClassNameSerializer(many=True)  # Serialize related classes
+    classes = ClassNameSerializer(many=True)
 
     class Meta:
         model = UploadedFile
         fields = ['id', 'name', 'fileType', 'uploaded_at', 'classes']
-
-    def get_name(self, obj):
-        return obj.file.name
 
     def get_fileType(self, obj):
         return obj.file.name.split('.')[-1]

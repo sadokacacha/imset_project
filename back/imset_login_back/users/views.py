@@ -10,6 +10,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse, Http404
 from django.utils.encoding import smart_str
 from django.db import IntegrityError
+from mimetypes import guess_type
 
 import logging
 
@@ -129,11 +130,9 @@ class TeacherClassListView(APIView):
             return Response({'error': 'You do not have permission to access this resource.'}, status=403)
 
         classes = request.user.classes_name.all()  # Get classes assigned to the teacher
+        print("Fetched classes:", classes)  # Debugging line
         serializer = ClassNameSerializer(classes, many=True)
         return Response(serializer.data)
-
-
-
 
 
 class TeacherFileUploadView(APIView):
@@ -144,6 +143,7 @@ class TeacherFileUploadView(APIView):
             return Response({'error': 'You do not have permission to access this resource.'}, status=403)
         
         file = request.FILES.get('file')
+        custom_name = request.data.get('name')
         class_ids = request.data.getlist('class_ids')  # Retrieve multiple class IDs
 
         if not file:
@@ -155,6 +155,7 @@ class TeacherFileUploadView(APIView):
         uploaded_file = UploadedFile(
             user=request.user, 
             file=file,
+            name=custom_name if custom_name else file.name  # Use custom name if provided
         )
         uploaded_file.save()
 
@@ -168,7 +169,6 @@ class TeacherFileUploadView(APIView):
 
         uploaded_file.save()
         return Response({'message': 'File uploaded successfully'}, status=status.HTTP_201_CREATED)
-
 
 
 
@@ -194,8 +194,17 @@ class TeacherFileDownloadView(APIView):
 
         try:
             uploaded_file = UploadedFile.objects.get(id=file_id, user=request.user)
-            response = HttpResponse(uploaded_file.file.read(), content_type='application/octet-stream')
-            response['Content-Disposition'] = f'attachment; filename={uploaded_file.file.name}'
+            file_path = uploaded_file.file.path
+
+            file_type, _ = guess_type(file_path)
+            
+            response = HttpResponse(uploaded_file.file.read(), content_type=file_type or 'application/octet-stream')
+
+            file_name = uploaded_file.name or uploaded_file.file.name
+            if '.' not in file_name:
+                file_name += f".{uploaded_file.file.name.split('.')[-1]}"
+
+            response['Content-Disposition'] = f'attachment; filename="{file_name}"'
             return response
         except UploadedFile.DoesNotExist:
             return Response({'error': 'File not found'}, status=404)
