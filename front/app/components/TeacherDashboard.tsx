@@ -1,84 +1,35 @@
 'use client';
-import React, { useContext, useState, useEffect } from 'react';
-import AuthContext from '../context/AuthContext';
-import type { AuthContextType } from '../context/AuthContext';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-interface UploadedFile {
-  id: string;
-  file: string;
-}
-
+// Define TypeScript interfaces for Class and UploadedFile
 interface Class {
   id: string;
   name: string;
 }
 
-interface Group {
+interface UploadedFile {
   id: string;
   name: string;
+  fileType: string;
+  uploaded_at: string; // String representation of the date
+  classes: Class[]; // Array of classes to which the file is uploaded
 }
 
 const TeacherDashboard: React.FC = () => {
-  const { user } = useContext(AuthContext) as AuthContextType;
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<string>('');
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-  const [classes, setClasses] = useState<Class[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [selectedClass, setSelectedClass] = useState<string>('');
-  const [selectedGroup, setSelectedGroup] = useState<string>('');
 
   useEffect(() => {
-    if (user && user.role === 'teacher') {
-      fetchUploadedFiles();
-      fetchTeacherClassesAndGroups();
-    }
-  }, [user]);
+    fetchTeacherClasses();
+    fetchUploadedFiles();
+  }, []);
 
-  // Handle file input change
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  // Handle file type selection
-  const handleFileTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFileType(e.target.value);
-  };
-
-  // Handle class selection
-  const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedClass(e.target.value);
-  };
-
-  // Handle group selection
-  const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedGroup(e.target.value);
-  };
-
-  // Fetch the uploaded files for the teacher
-  const fetchUploadedFiles = async () => {
-    const accessToken = Cookies.get('access_token');
-    try {
-      const response = await axios.get<UploadedFile[]>(
-        'http://localhost:8000/api/teacher/upload-file/',
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      setUploadedFiles(response.data);
-    } catch (error) {
-      console.error('Failed to fetch files', error);
-    }
-  };
-
-  // Fetch the classes and groups associated with the teacher
-  const fetchTeacherClassesAndGroups = async () => {
+  const fetchTeacherClasses = async () => {
     const accessToken = Cookies.get('access_token');
     try {
       const classResponse = await axios.get<Class[]>(
@@ -90,32 +41,59 @@ const TeacherDashboard: React.FC = () => {
         }
       );
       setClasses(classResponse.data);
-
-      const groupResponse = await axios.get<Group[]>(
-        'http://localhost:8000/api/teacher/groups/',
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      setGroups(groupResponse.data);
     } catch (error) {
-      console.error('Failed to fetch classes and groups', error);
+      console.error('Failed to fetch classes', error);
     }
   };
 
-  // Handle file upload
+const fetchUploadedFiles = async () => {
+  const accessToken = Cookies.get('access_token');
+  try {
+    const fileResponse = await axios.get<UploadedFile[]>(
+      'http://localhost:8000/api/teacher/uploaded-files/',
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    console.log(fileResponse.data); // Log the response to check the data
+    setUploadedFiles(fileResponse.data);
+  } catch (error) {
+    console.error('Failed to fetch uploaded files', error);
+  }
+};
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleFileTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFileType(e.target.value);
+  };
+
+  const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOptions = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
+    setSelectedClasses(selectedOptions);
+  };
+
   const uploadFile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !selectedClass) return;
+    if (!file || selectedClasses.length === 0) return;
 
     const accessToken = Cookies.get('access_token');
     const formData = new FormData();
     formData.append('file', file);
     formData.append('file_type', fileType);
-    formData.append('class_id', selectedClass);
-    formData.append('group_id', selectedGroup);
+
+    selectedClasses.forEach((classId) => {
+      formData.append('class_ids', classId);
+    });
 
     try {
       await axios.post(
@@ -136,35 +114,9 @@ const TeacherDashboard: React.FC = () => {
     }
   };
 
-  // Handle file download
-  const downloadFile = (fileId: string, fileName: string) => {
-    const accessToken = Cookies.get('access_token');
-    axios
-      .get(`http://localhost:8000/api/teacher/download-file/${fileId}/`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        responseType: 'blob',
-      })
-      .then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      })
-      .catch((error) => {
-        console.error('Failed to download file', error);
-      });
-  };
-
   return (
     <div>
-      <h1>
-        Welcome to the Teacher Dashboard, {user?.first_name} {user?.last_name}
-      </h1>
+      <h1>Teacher Dashboard</h1>
       <form onSubmit={uploadFile}>
         <input type="file" onChange={handleFileChange} required />
         <select value={fileType} onChange={handleFileTypeChange} required>
@@ -173,33 +125,33 @@ const TeacherDashboard: React.FC = () => {
           <option value="ppt">PowerPoint</option>
           <option value="doc">Word Document</option>
         </select>
-        <select value={selectedClass} onChange={handleClassChange} required>
-          <option value="">Select Class</option>
+
+        <select
+          multiple
+          value={selectedClasses}
+          onChange={handleClassChange}
+          required
+        >
+          <option value="">Select Classes</option>
           {classes.map((cls) => (
             <option key={cls.id} value={cls.id}>
               {cls.name}
             </option>
           ))}
         </select>
-        <select value={selectedGroup} onChange={handleGroupChange}>
-          <option value="">Select Group (optional)</option>
-          {groups.map((group) => (
-            <option key={group.id} value={group.id}>
-              {group.name}
-            </option>
-          ))}
-        </select>
+
         <button type="submit">Upload File</button>
       </form>
 
-      <h2>Your Uploaded Files:</h2>
+      <h2>Uploaded Files</h2>
       <ul>
         {uploadedFiles.map((file) => (
           <li key={file.id}>
-            {file.file}
-            <button onClick={() => downloadFile(file.id, file.file)}>
-              Download
-            </button>
+            {file.name} ({file.fileType}) - Uploaded on{' '}
+            {new Date(file.uploaded_at).toLocaleDateString()} to classes:{' '}
+            {file.classes.length > 0
+              ? file.classes.map((cls) => cls.name).join(', ')
+              : 'No classes'}
           </li>
         ))}
       </ul>

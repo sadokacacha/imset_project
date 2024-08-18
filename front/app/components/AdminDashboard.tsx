@@ -43,7 +43,6 @@ const AdminDashboard: React.FC = () => {
     class_name: '',
   });
 
-  // Fetch the dashboard data and classes
   const fetchDashboardData = async () => {
     try {
       const accessToken = Cookies.get('access_token');
@@ -62,6 +61,18 @@ const AdminDashboard: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch dashboard data', error);
     }
+  };
+
+  // Function to map class IDs to class names
+  const getClassNamesByIds = (ids: number[]): string[] => {
+    return ids
+      .map((id) => classes.find((cls) => cls.id === id)?.name)
+      .filter(Boolean) as string[];
+  };
+
+  // For students, find the class name by ID
+  const getClassNameById = (id: number): string | undefined => {
+    return classes.find((cls) => cls.id === id)?.name;
   };
 
   const deleteUser = async (userId: number) => {
@@ -170,7 +181,9 @@ const AdminDashboard: React.FC = () => {
       <ul>
         {teachers.map((teacher) => (
           <li key={teacher.id}>
-            {teacher.first_name} {teacher.last_name} - {teacher.email}
+            {teacher.first_name} {teacher.last_name} - {teacher.email} -{' '}
+            {getClassNamesByIds(teacher.classes_name || []).join(', ')}{' '}
+            {/* Display class names */}
             <button onClick={() => deleteUser(teacher.id)}>Delete</button>
           </li>
         ))}
@@ -180,7 +193,9 @@ const AdminDashboard: React.FC = () => {
       <ul>
         {students.map((student) => (
           <li key={student.id}>
-            {student.first_name} {student.last_name} - {student.email}
+            {student.first_name} {student.last_name} - {student.email} -{' '}
+            {getClassNameById(student.class_name || 0)}{' '}
+            {/* Display class name */}
             <button onClick={() => deleteUser(student.id)}>Delete</button>
           </li>
         ))}

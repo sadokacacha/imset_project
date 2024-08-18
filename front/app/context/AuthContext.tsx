@@ -12,6 +12,8 @@ export interface User {
   first_name: string;
   last_name: string;
   email: string;
+  classes_name?: number[];
+  class_name?: number;
 }
 
 export interface AuthContextType {
