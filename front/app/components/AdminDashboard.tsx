@@ -26,9 +26,10 @@ interface NewUser {
 
 const AdminDashboard: React.FC = () => {
   const { user } = useContext(AuthContext) as AuthContextType;
+  const [admins, setAdmins] = useState<User[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
   const [students, setStudents] = useState<User[]>([]);
-  const [classes, setClasses] = useState<ClassName[]>([]); // Fetch classes
+  const [classes, setClasses] = useState<ClassName[]>([]);
   const [newUser, setNewUser] = useState<NewUser>({
     email: '',
     role: '',
@@ -42,6 +43,13 @@ const AdminDashboard: React.FC = () => {
     classes_name: [],
     class_name: '',
   });
+  const [activeTab, setActiveTab] = useState<
+    'admins' | 'teachers' | 'students'
+  >('admins');
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const fetchDashboardData = async () => {
     try {
@@ -55,9 +63,10 @@ const AdminDashboard: React.FC = () => {
         }),
       ]);
 
+      setAdmins(dashboardResponse.data.admins || []);
       setTeachers(dashboardResponse.data.teachers || []);
       setStudents(dashboardResponse.data.students || []);
-      setClasses(classesResponse.data || []); // Store classes data
+      setClasses(classesResponse.data || []);
     } catch (error) {
       console.error('Failed to fetch dashboard data', error);
     }
@@ -170,6 +179,29 @@ const AdminDashboard: React.FC = () => {
     return <p>Access Denied</p>;
   }
 
+  // Pagination logic
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedAdmins = admins.slice(startIndex, endIndex);
+  const paginatedTeachers = teachers.slice(startIndex, endIndex);
+  const paginatedStudents = students.slice(startIndex, endIndex);
+
+  const nextPage = () => {
+    if (activeTab === 'admins' && endIndex < admins.length) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    } else if (activeTab === 'teachers' && endIndex < teachers.length) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    } else if (activeTab === 'students' && endIndex < students.length) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
+  };
+
   return (
     <div>
       <h1>Admin Dashboard</h1>
@@ -177,29 +209,94 @@ const AdminDashboard: React.FC = () => {
         Welcome, {user?.first_name} {user?.last_name}
       </p>
 
-      <h2>Teachers</h2>
-      <ul>
-        {teachers.map((teacher) => (
-          <li key={teacher.id}>
-            {teacher.first_name} {teacher.last_name} - {teacher.email} -{' '}
-            {getClassNamesByIds(teacher.classes_name || []).join(', ')}{' '}
-            {/* Display class names */}
-            <button onClick={() => deleteUser(teacher.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      <div>
+        <button
+          onClick={() => {
+            setActiveTab('admins');
+            setCurrentPage(1);
+          }}
+        >
+          Admins
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('teachers');
+            setCurrentPage(1);
+          }}
+        >
+          Teachers
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('students');
+            setCurrentPage(1);
+          }}
+        >
+          Students
+        </button>
+      </div>
 
-      <h2>Students</h2>
-      <ul>
-        {students.map((student) => (
-          <li key={student.id}>
-            {student.first_name} {student.last_name} - {student.email} -{' '}
-            {getClassNameById(student.class_name || 0)}{' '}
-            {/* Display class name */}
-            <button onClick={() => deleteUser(student.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      {activeTab === 'admins' && (
+        <>
+          <h2>Admins</h2>
+          <ul>
+            {paginatedAdmins.map((admin) => (
+              <li key={admin.id}>
+                {admin.first_name} {admin.last_name} - {admin.email}
+                <button onClick={() => deleteUser(admin.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {activeTab === 'teachers' && (
+        <>
+          <h2>Teachers</h2>
+          <ul>
+            {paginatedTeachers.map((teacher) => (
+              <li key={teacher.id}>
+                {teacher.first_name} {teacher.last_name} - {teacher.email} -{' '}
+                {getClassNamesByIds(teacher.classes_name || []).join(', ')}{' '}
+                {/* Display class names */}
+                <button onClick={() => deleteUser(teacher.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {activeTab === 'students' && (
+        <>
+          <h2>Students</h2>
+          <ul>
+            {paginatedStudents.map((student) => (
+              <li key={student.id}>
+                {student.first_name} {student.last_name} - {student.email} -{' '}
+                {getClassNameById(student.class_name || 0)}{' '}
+                {/* Display class name */}
+                <button onClick={() => deleteUser(student.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <div>
+        <button onClick={prevPage} disabled={currentPage === 1}>
+          Previous
+        </button>
+        <button
+          onClick={nextPage}
+          disabled={
+            (activeTab === 'admins' && endIndex >= admins.length) ||
+            (activeTab === 'teachers' && endIndex >= teachers.length) ||
+            (activeTab === 'students' && endIndex >= students.length)
+          }
+        >
+          Next
+        </button>
+      </div>
 
       <h2>Add New User</h2>
       <form onSubmit={createUser}>

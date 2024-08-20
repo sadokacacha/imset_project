@@ -38,12 +38,16 @@ class AdminDashboardView(APIView):
     def get(self, request, *args, **kwargs):
         if request.user.role != 'admin':
             return Response({'error': 'You do not have permission to access this resource.'}, status=403)
+        
+        admins = User.objects.filter(role='admin').values('id', 'email', 'first_name', 'last_name')
         teachers = User.objects.filter(role='teacher').values('id', 'email', 'first_name', 'last_name')
         students = User.objects.filter(role='student').values('id', 'email', 'first_name', 'last_name')
 
-        return Response({'teachers': list(teachers), 'students': list(students)})
-
-
+        return Response({
+            'admins': list(admins),
+            'teachers': list(teachers),
+            'students': list(students),
+        })
 
 
 class StudentDashboardView(APIView):
