@@ -5,13 +5,20 @@ import { AxiosError } from 'axios';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 
-// Define the User and AuthContextType interfaces
+export interface ClassName {
+  id: number;
+  name: string;
+}
 export interface User {
   id: number;
+  email: string;
   role: string;
   first_name: string;
   last_name: string;
-  email: string;
+  date_of_birth?: string;
+  id_card_or_passport?: string;
+  phone?: string;
+  picture?: string;
   classes_name?: number[];
   class_name?: number;
 }

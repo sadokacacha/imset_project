@@ -1,9 +1,17 @@
 'use client';
-
-import { useContext, useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import React from 'react';
+import {
+  useContext,
+  useState,
+  useEffect,
+  ChangeEvent,
+  FormEvent,
+  ReactNode,
+} from 'react';
 import AuthContext, { AuthContextType, User } from '../context/AuthContext';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import UserModal from './UserModal';
 
 interface ClassName {
   id: number;
@@ -46,10 +54,24 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     'admins' | 'teachers' | 'students'
   >('admins');
+  const [filters, setFilters] = useState({
+    id: '',
+    name: '',
+    email: '',
+    date_of_birth: '',
+    classes_name: '',
+  });
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Modal state for creating user
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Modal state for viewing user details
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const fetchDashboardData = async () => {
     try {
@@ -73,16 +95,17 @@ const AdminDashboard: React.FC = () => {
   };
 
   // Function to map class IDs to class names
-  const getClassNamesByIds = (ids: number[]): string[] => {
-    return ids
-      .map((id) => classes.find((cls) => cls.id === id)?.name)
-      .filter(Boolean) as string[];
-  };
+ const getClassNamesByIds = (ids: number[] = []): string[] => {
+   return ids
+     .map((id) => classes.find((cls) => cls.id === id)?.name)
+     .filter(Boolean) as string[];
+ };
 
   // For students, find the class name by ID
-  const getClassNameById = (id: number): string | undefined => {
-    return classes.find((cls) => cls.id === id)?.name;
-  };
+ const getClassNameById = (id: number | undefined): string | undefined => {
+   if (id === undefined) return undefined;
+   return classes.find((cls) => cls.id === id)?.name;
+ };
 
   const deleteUser = async (userId: number) => {
     try {
@@ -115,6 +138,35 @@ const AdminDashboard: React.FC = () => {
     } else {
       setNewUser({ ...newUser, [name]: value });
     }
+  };
+
+  const handleFilterChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFilters({ ...filters, [name]: value });
+  };
+
+  const applyFilters = (users: User[]): User[] => {
+    return users.filter((user) => {
+      return (
+        (!filters.id || user.id.toString().includes(filters.id)) &&
+        (!filters.name ||
+          user.first_name.toLowerCase().includes(filters.name.toLowerCase()) ||
+          user.last_name.toLowerCase().includes(filters.name.toLowerCase())) &&
+        (!filters.email ||
+          user.email.toLowerCase().includes(filters.email.toLowerCase())) &&
+        (!filters.date_of_birth ||
+          (user.date_of_birth &&
+            user.date_of_birth.includes(filters.date_of_birth))) &&
+        (!filters.classes_name ||
+          (user.classes_name &&
+            getClassNamesByIds(user.classes_name)
+              .join(', ')
+              .toLowerCase()
+              .includes(filters.classes_name.toLowerCase())))
+      );
+    });
   };
 
   const createUser = async (e: FormEvent) => {
@@ -157,6 +209,7 @@ const AdminDashboard: React.FC = () => {
         classes_name: [],
         class_name: '',
       });
+      setIsModalOpen(false);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Failed to create user', error.response?.data);
@@ -182,16 +235,21 @@ const AdminDashboard: React.FC = () => {
   // Pagination logic
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedAdmins = admins.slice(startIndex, endIndex);
-  const paginatedTeachers = teachers.slice(startIndex, endIndex);
-  const paginatedStudents = students.slice(startIndex, endIndex);
+
+  const filteredAdmins = applyFilters(admins);
+  const filteredTeachers = applyFilters(teachers);
+  const filteredStudents = applyFilters(students);
+
+  const paginatedAdmins = filteredAdmins.slice(startIndex, endIndex);
+  const paginatedTeachers = filteredTeachers.slice(startIndex, endIndex);
+  const paginatedStudents = filteredStudents.slice(startIndex, endIndex);
 
   const nextPage = () => {
-    if (activeTab === 'admins' && endIndex < admins.length) {
+    if (activeTab === 'admins' && endIndex < filteredAdmins.length) {
       setCurrentPage((prevPage) => prevPage + 1);
-    } else if (activeTab === 'teachers' && endIndex < teachers.length) {
+    } else if (activeTab === 'teachers' && endIndex < filteredTeachers.length) {
       setCurrentPage((prevPage) => prevPage + 1);
-    } else if (activeTab === 'students' && endIndex < students.length) {
+    } else if (activeTab === 'students' && endIndex < filteredStudents.length) {
       setCurrentPage((prevPage) => prevPage + 1);
     }
   };
@@ -202,196 +260,239 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const openUserModal = (user: User) => {
+    setSelectedUser(user);
+    setIsUserModalOpen(true);
+  };
+
+  const renderTableRows = (users: User[]): ReactNode => {
+    return users.map((user) => (
+      <tr key={user.id}>
+        <td>{user.id}</td>
+        <td>
+          {user.first_name} {user.last_name}
+        </td>
+        <td>{user.email}</td>
+        <td>{user.date_of_birth}</td>
+        <td>
+          {user.role === 'teacher'
+            ? getClassNamesByIds(user.classes_name).join(', ')
+            : getClassNameById(user.class_name)}
+        </td>
+        <td>
+          <button onClick={() => deleteUser(user.id)}>Delete</button>
+        </td>
+        <td>
+          <button onClick={() => openUserModal(user)}>View</button>
+        </td>
+      </tr>
+    ));
+  };
+
   return (
     <div>
       <h1>Admin Dashboard</h1>
-      <p>
-        Welcome, {user?.first_name} {user?.last_name}
-      </p>
+
+      <button onClick={() => setIsModalOpen(true)}>Create User</button>
 
       <div>
-        <button
-          onClick={() => {
-            setActiveTab('admins');
-            setCurrentPage(1);
-          }}
-        >
-          Admins
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('teachers');
-            setCurrentPage(1);
-          }}
-        >
-          Teachers
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('students');
-            setCurrentPage(1);
-          }}
-        >
-          Students
-        </button>
+        <button onClick={() => setActiveTab('admins')}>Admins</button>
+        <button onClick={() => setActiveTab('teachers')}>Teachers</button>
+        <button onClick={() => setActiveTab('students')}>Students</button>
       </div>
-
-      {activeTab === 'admins' && (
-        <>
-          <h2>Admins</h2>
-          <ul>
-            {paginatedAdmins.map((admin) => (
-              <li key={admin.id}>
-                {admin.first_name} {admin.last_name} - {admin.email}
-                <button onClick={() => deleteUser(admin.id)}>Delete</button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      {activeTab === 'teachers' && (
-        <>
-          <h2>Teachers</h2>
-          <ul>
-            {paginatedTeachers.map((teacher) => (
-              <li key={teacher.id}>
-                {teacher.first_name} {teacher.last_name} - {teacher.email} -{' '}
-                {getClassNamesByIds(teacher.classes_name || []).join(', ')}{' '}
-                {/* Display class names */}
-                <button onClick={() => deleteUser(teacher.id)}>Delete</button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      {activeTab === 'students' && (
-        <>
-          <h2>Students</h2>
-          <ul>
-            {paginatedStudents.map((student) => (
-              <li key={student.id}>
-                {student.first_name} {student.last_name} - {student.email} -{' '}
-                {getClassNameById(student.class_name || 0)}{' '}
-                {/* Display class name */}
-                <button onClick={() => deleteUser(student.id)}>Delete</button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
 
       <div>
-        <button onClick={prevPage} disabled={currentPage === 1}>
-          Previous
-        </button>
-        <button
-          onClick={nextPage}
-          disabled={
-            (activeTab === 'admins' && endIndex >= admins.length) ||
-            (activeTab === 'teachers' && endIndex >= teachers.length) ||
-            (activeTab === 'students' && endIndex >= students.length)
-          }
-        >
-          Next
-        </button>
-      </div>
-
-      <h2>Add New User</h2>
-      <form onSubmit={createUser}>
         <input
-          type="email"
+          type="text"
+          name="id"
+          placeholder="Filter by ID"
+          value={filters.id}
+          onChange={handleFilterChange}
+        />
+        <input
+          type="text"
+          name="name"
+          placeholder="Filter by Name"
+          value={filters.name}
+          onChange={handleFilterChange}
+        />
+        <input
+          type="text"
           name="email"
-          placeholder="Email"
-          value={newUser.email}
-          onChange={handleChange}
-        />
-        <select name="role" value={newUser.role} onChange={handleChange}>
-          <option value="">Select Role</option>
-          <option value="admin">Admin</option>
-          <option value="teacher">Teacher</option>
-          <option value="student">Student</option>
-        </select>
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={newUser.password}
-          onChange={handleChange}
+          placeholder="Filter by Email"
+          value={filters.email}
+          onChange={handleFilterChange}
         />
         <input
           type="text"
-          name="first_name"
-          placeholder="First Name"
-          value={newUser.first_name}
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          name="last_name"
-          placeholder="Last Name"
-          value={newUser.last_name}
-          onChange={handleChange}
-        />
-        <input
-          type="date"
           name="date_of_birth"
-          value={newUser.date_of_birth}
-          onChange={handleChange}
+          placeholder="Filter by Date of Birth"
+          value={filters.date_of_birth}
+          onChange={handleFilterChange}
         />
         <input
           type="text"
-          name="id_card_or_passport"
-          placeholder="ID Card or Passport"
-          value={newUser.id_card_or_passport}
-          onChange={handleChange}
+          name="classes_name"
+          placeholder="Filter by Class"
+          value={filters.classes_name}
+          onChange={handleFilterChange}
         />
-        <input
-          type="text"
-          name="phone"
-          placeholder="Phone"
-          value={newUser.phone}
-          onChange={handleChange}
-        />
-        <input type="file" name="picture" onChange={handleChange} />
+      </div>
 
-        {(newUser.role === 'teacher' || newUser.role === 'student') &&
-          classes.length > 0 && (
-            <>
-              {newUser.role === 'teacher' && (
-                <select
-                  name="classes_name"
-                  multiple
-                  value={newUser.classes_name.map(String)}
-                  onChange={handleChange}
-                >
-                  {classes.map((className) => (
-                    <option key={className.id} value={className.id.toString()}>
-                      {className.name}
-                    </option>
-                  ))}
-                </select>
-              )}
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Date of Birth</th>
+            <th>Class</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {activeTab === 'admins' && renderTableRows(paginatedAdmins)}
+          {activeTab === 'teachers' && renderTableRows(paginatedTeachers)}
+          {activeTab === 'students' && renderTableRows(paginatedStudents)}
+        </tbody>
+      </table>
 
-              {newUser.role === 'student' && (
-                <select
-                  name="class_name"
-                  value={newUser.class_name.toString()}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Class</option>
-                  {classes.map((className) => (
-                    <option key={className.id} value={className.id.toString()}>
-                      {className.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </>
-          )}
-        <button type="submit">Add User</button>
-      </form>
+      <button onClick={prevPage} disabled={currentPage === 1}>
+        Previous
+      </button>
+      <button
+        onClick={nextPage}
+        disabled={
+          (activeTab === 'admins' && endIndex >= filteredAdmins.length) ||
+          (activeTab === 'teachers' && endIndex >= filteredTeachers.length) ||
+          (activeTab === 'students' && endIndex >= filteredStudents.length)
+        }
+      >
+        Next
+      </button>
+
+      {isModalOpen && (
+        <div>
+          <h2>Create User</h2>
+          <form onSubmit={createUser}>
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={newUser.email}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={newUser.password}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="text"
+              name="first_name"
+              placeholder="First Name"
+              value={newUser.first_name}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="text"
+              name="last_name"
+              placeholder="Last Name"
+              value={newUser.last_name}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="date"
+              name="date_of_birth"
+              value={newUser.date_of_birth}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="text"
+              name="id_card_or_passport"
+              placeholder="ID Card/Passport"
+              value={newUser.id_card_or_passport}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone"
+              value={newUser.phone}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="file"
+              name="picture"
+              onChange={handleChange}
+              accept="image/*"
+              required
+            />
+            <select
+              name="role"
+              value={newUser.role}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Role</option>
+              <option value="admin">Admin</option>
+              <option value="teacher">Teacher</option>
+              <option value="student">Student</option>
+            </select>
+
+            {newUser.role === 'teacher' && (
+              <select
+                multiple
+                name="classes_name"
+                value={newUser.classes_name.map(String)}
+                onChange={handleChange}
+              >
+                {classes.map((cls) => (
+                  <option key={cls.id} value={cls.id}>
+                    {cls.name}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {newUser.role === 'student' && (
+              <select
+                name="class_name"
+                value={newUser.class_name}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Class</option>
+                {classes.map((cls) => (
+                  <option key={cls.id} value={cls.id}>
+                    {cls.name}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            <button type="submit">Create</button>
+            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+          </form>
+        </div>
+      )}
+
+      <UserModal
+        show={isUserModalOpen}
+        handleClose={() => setIsUserModalOpen(false)}
+        user={selectedUser}
+        getClassNamesByIds={getClassNamesByIds}
+        getClassNameById={getClassNameById} // Pass this function
+      />
     </div>
   );
 };

@@ -50,20 +50,6 @@ class AdminDashboardView(APIView):
         })
 
 
-class StudentDashboardView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        if request.user.role != 'student':
-            return Response({'error': 'You do not have permission to access this resource.'}, status=403)
-        return Response({'message': 'Welcome, student!'})
-    
-
-
-logger = logging.getLogger(__name__)
-
-User = get_user_model()
-
 
 class UserCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -212,3 +198,21 @@ class TeacherFileDownloadView(APIView):
             return response
         except UploadedFile.DoesNotExist:
             return Response({'error': 'File not found'}, status=404)
+
+
+
+
+class StudentDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.role != 'student':
+            return Response({'error': 'You do not have permission to access this resource.'}, status=403)
+        return Response({'message': 'Welcome, student!'})
+    
+
+
+logger = logging.getLogger(__name__)
+
+User = get_user_model()
+
