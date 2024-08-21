@@ -11,7 +11,7 @@ import {
 import AuthContext, { AuthContextType, User } from '../context/AuthContext';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import UserModal from './UserModal';
+import UserModal from '../components/admin_modal/UserModal';
 
 interface ClassName {
   id: number;
@@ -95,17 +95,17 @@ const AdminDashboard: React.FC = () => {
   };
 
   // Function to map class IDs to class names
- const getClassNamesByIds = (ids: number[] = []): string[] => {
-   return ids
-     .map((id) => classes.find((cls) => cls.id === id)?.name)
-     .filter(Boolean) as string[];
- };
+  const getClassNamesByIds = (ids: number[] = []): string[] => {
+    return ids
+      .map((id) => classes.find((cls) => cls.id === id)?.name)
+      .filter(Boolean) as string[];
+  };
 
   // For students, find the class name by ID
- const getClassNameById = (id: number | undefined): string | undefined => {
-   if (id === undefined) return undefined;
-   return classes.find((cls) => cls.id === id)?.name;
- };
+  const getClassNameById = (id: number | undefined): string | undefined => {
+    if (id === undefined) return undefined;
+    return classes.find((cls) => cls.id === id)?.name;
+  };
 
   const deleteUser = async (userId: number) => {
     try {

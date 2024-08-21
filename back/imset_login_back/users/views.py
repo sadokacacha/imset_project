@@ -32,6 +32,7 @@ class UserDetailView(APIView):
     
 User = get_user_model()
 
+
 class AdminDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -48,7 +49,6 @@ class AdminDashboardView(APIView):
             'teachers': list(teachers),
             'students': list(students),
         })
-
 
 
 class UserCreateView(APIView):
