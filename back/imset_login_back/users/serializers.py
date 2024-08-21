@@ -42,21 +42,18 @@ class ClassNameSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     picture = serializers.ImageField(required=False)
-    classes_name = serializers.PrimaryKeyRelatedField(
-        queryset=ClassName.objects.all(), many=True, required=False
-    )
-    class_name = serializers.PrimaryKeyRelatedField(
-        queryset=ClassName.objects.all(), required=False
-    )
 
     class Meta:
         model = User
-        fields = [
-            'id', 'email', 'role', 'first_name', 'last_name', 'password', 
-            'date_of_birth', 'id_card_or_passport', 'phone', 'picture', 
-            'classes_name', 'class_name'
-        ]
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['id', 'email', 'role', 'first_name', 'last_name', 'picture']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.role == 'teacher':
+            data['classes_name'] = [cls.name for cls in instance.classes_name.all()]
+        elif instance.role == 'student':
+            data['class_name'] = instance.class_name.name if instance.class_name else None
+        return data
 
     def create(self, validated_data):
         classes_name = validated_data.pop('classes_name', [])
@@ -76,14 +73,21 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
-
+        
 class UploadedFileSerializer(serializers.ModelSerializer):
     fileType = serializers.SerializerMethodField()
     classes = ClassNameSerializer(many=True)
+    teacher = serializers.SerializerMethodField()
 
     class Meta:
         model = UploadedFile
-        fields = ['id', 'name', 'fileType', 'uploaded_at', 'classes']
+        fields = ['id', 'name', 'fileType', 'uploaded_at', 'classes', 'teacher']
 
     def get_fileType(self, obj):
         return obj.file.name.split('.')[-1]
+
+    def get_teacher(self, obj):
+        return {
+            "first_name": obj.user.first_name,
+            "last_name": obj.user.last_name
+        }

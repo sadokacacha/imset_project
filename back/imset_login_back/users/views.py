@@ -39,18 +39,21 @@ class AdminDashboardView(APIView):
     def get(self, request, *args, **kwargs):
         if request.user.role != 'admin':
             return Response({'error': 'You do not have permission to access this resource.'}, status=403)
-        
-        admins = User.objects.filter(role='admin').values('id', 'email', 'first_name', 'last_name')
-        teachers = User.objects.filter(role='teacher').values('id', 'email', 'first_name', 'last_name')
-        students = User.objects.filter(role='student').values('id', 'email', 'first_name', 'last_name')
+
+        admins = User.objects.filter(role='admin')
+        teachers = User.objects.filter(role='teacher').prefetch_related('classes_name')
+        students = User.objects.filter(role='student').select_related('class_name')
+
+        admins_serializer = UserSerializer(admins, many=True)
+        teachers_serializer = UserSerializer(teachers, many=True)
+        students_serializer = UserSerializer(students, many=True)
 
         return Response({
-            'admins': list(admins),
-            'teachers': list(teachers),
-            'students': list(students),
+            'admins': admins_serializer.data,
+            'teachers': teachers_serializer.data,
+            'students': students_serializer.data,
         })
-
-
+    
 class UserCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -216,3 +219,45 @@ logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
+
+
+class StudentClassFilesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.role != 'student':
+            return Response({'error': 'You do not have permission to access this resource.'}, status=403)
+
+        student_class = request.user.class_name
+        if not student_class:
+            return Response({'error': 'You are not assigned to any class.'}, status=400)
+
+        files = UploadedFile.objects.filter(classes=student_class)
+        serializer = UploadedFileSerializer(files, many=True)
+        return Response(serializer.data)
+    
+class StudentFileDownloadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, file_id, *args, **kwargs):
+        if request.user.role != 'student':
+            return Response({'error': 'You do not have permission to access this resource.'}, status=403)
+
+        try:
+            uploaded_file = UploadedFile.objects.get(id=file_id)
+            if not uploaded_file.classes.filter(id=request.user.class_name.id).exists():
+                return Response({'error': 'You do not have permission to access this file.'}, status=403)
+
+            file_path = uploaded_file.file.path
+            file_type, _ = guess_type(file_path)
+            
+            response = HttpResponse(uploaded_file.file.read(), content_type=file_type or 'application/octet-stream')
+
+            file_name = uploaded_file.name or uploaded_file.file.name
+            if '.' not in file_name:
+                file_name += f".{uploaded_file.file.name.split('.')[-1]}"
+
+            response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+            return response
+        except UploadedFile.DoesNotExist:
+            return Response({'error': 'File not found'}, status=404)

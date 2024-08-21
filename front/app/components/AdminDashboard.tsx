@@ -262,33 +262,33 @@ const AdminDashboard: React.FC = () => {
 
   const openUserModal = (user: User) => {
     setSelectedUser(user);
-    setIsUserModalOpen(true);
+    setIsUserModalOpen(true); // Corrected this line
   };
-
-  const renderTableRows = (users: User[]): ReactNode => {
-    return users.map((user) => (
-      <tr key={user.id}>
-        <td>{user.id}</td>
-        <td>
-          {user.first_name} {user.last_name}
-        </td>
-        <td>{user.email}</td>
-        <td>{user.date_of_birth}</td>
-        <td>
-          {user.role === 'teacher'
-            ? getClassNamesByIds(user.classes_name).join(', ')
-            : getClassNameById(user.class_name)}
-        </td>
-        <td>
-          <button onClick={() => deleteUser(user.id)}>Delete</button>
-        </td>
-        <td>
-          <button onClick={() => openUserModal(user)}>View</button>
-        </td>
-      </tr>
-    ));
-  };
-
+const renderTableRows = (users: User[]): ReactNode => {
+  return users.map((user) => (
+    <tr key={user.id}>
+      <td>{user.id}</td>
+      <td>
+        {user.first_name} {user.last_name}
+      </td>
+      <td>{user.email}</td>
+      <td>{user.date_of_birth}</td>
+      <td>
+        {user.role === 'teacher'
+          ? getClassNamesByIds(user.classes_name).join(', ')
+          : user.role === 'student'
+          ? getClassNameById(user.class_name)
+          : '-'}
+      </td>
+      <td>
+        <button onClick={() => deleteUser(user.id)}>Delete</button>
+      </td>
+      <td>
+        <button onClick={() => openUserModal(user)}>View</button>
+      </td>
+    </tr>
+  ));
+};
   return (
     <div>
       <h1>Admin Dashboard</h1>
