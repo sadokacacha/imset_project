@@ -12,6 +12,7 @@ import AuthContext, { AuthContextType, User } from '../context/AuthContext';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import UserModal from '../components/admin_modal/UserModal';
+import EditUserModal from '../components/admin_modal/EditUserModal';
 
 interface ClassName {
   id: number;
@@ -69,6 +70,10 @@ const AdminDashboard: React.FC = () => {
   // Modal state for creating user
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Modal state for editing user
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   // Modal state for viewing user details
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -92,6 +97,12 @@ const AdminDashboard: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch dashboard data', error);
     }
+  };
+
+  // Function to open the edit modal
+  const openEditModal = (user: User) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
   };
 
   // Function to map class IDs to class names
@@ -265,42 +276,49 @@ const AdminDashboard: React.FC = () => {
     setIsUserModalOpen(true); // Corrected this line
   };
 const renderTableRows = (users: User[]): ReactNode => {
-  return users.map((user) => (
-    <tr key={user.id}>
-      <td>{user.id}</td>
-      <td>
-        {user.first_name} {user.last_name}
-      </td>
-      <td>{user.email}</td>
-      <td>{user.date_of_birth}</td>
-      <td>
-        {user.role === 'teacher'
-          ? getClassNamesByIds(user.classes_name).join(', ')
-          : user.role === 'student'
-          ? getClassNameById(user.class_name)
-          : '-'}
-      </td>
-      <td>
-        <button onClick={() => deleteUser(user.id)}>Delete</button>
-      </td>
-      <td>
-        <button onClick={() => openUserModal(user)}>View</button>
-      </td>
-    </tr>
-  ));
+  return users.map((user) => {
+    const formattedDate = user.date_of_birth
+      ? new Date(user.date_of_birth).toLocaleDateString()
+      : '-';
+
+    const classInfo =
+      user.role === 'teacher'
+        ? getClassNamesByIds(user.classes_name).join(', ')
+        : user.role === 'student'
+        ? getClassNameById(user.class_name) || '-'
+        : '-';
+
+    return (
+      <tr key={user.id}>
+        <td>{user.id}</td>
+        <td>
+          {user.first_name} {user.last_name}
+        </td>
+        <td>{user.email}</td>
+        <td>{formattedDate}</td>
+        <td>{classInfo}</td>
+        <td>
+          <button onClick={() => deleteUser(user.id)}>Delete</button>
+        </td>
+        <td>
+          <button onClick={() => openUserModal(user)}>View</button>
+        </td>
+        <td>
+          <button onClick={() => openEditModal(user)}>Edit</button>
+        </td>
+      </tr>
+    );
+  });
 };
   return (
     <div>
       <h1>Admin Dashboard</h1>
-
       <button onClick={() => setIsModalOpen(true)}>Create User</button>
-
       <div>
         <button onClick={() => setActiveTab('admins')}>Admins</button>
         <button onClick={() => setActiveTab('teachers')}>Teachers</button>
         <button onClick={() => setActiveTab('students')}>Students</button>
       </div>
-
       <div>
         <input
           type="text"
@@ -338,7 +356,6 @@ const renderTableRows = (users: User[]): ReactNode => {
           onChange={handleFilterChange}
         />
       </div>
-
       <table>
         <thead>
           <tr>
@@ -356,7 +373,6 @@ const renderTableRows = (users: User[]): ReactNode => {
           {activeTab === 'students' && renderTableRows(paginatedStudents)}
         </tbody>
       </table>
-
       <button onClick={prevPage} disabled={currentPage === 1}>
         Previous
       </button>
@@ -370,7 +386,6 @@ const renderTableRows = (users: User[]): ReactNode => {
       >
         Next
       </button>
-
       {isModalOpen && (
         <div>
           <h2>Create User</h2>
@@ -485,7 +500,14 @@ const renderTableRows = (users: User[]): ReactNode => {
           </form>
         </div>
       )}
-
+      <EditUserModal
+        show={isEditModalOpen}
+        handleClose={() => setIsEditModalOpen(false)}
+        user={selectedUser}
+        classes={classes}
+        fetchDashboardData={fetchDashboardData}
+      />
+      ;
       <UserModal
         show={isUserModalOpen}
         handleClose={() => setIsUserModalOpen(false)}

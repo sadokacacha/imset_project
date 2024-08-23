@@ -18,8 +18,8 @@ export interface User {
   date_of_birth?: string;
   id_card_or_passport?: string;
   phone?: string;
-  picture?: string;
-  classes_name?: number[];
+  picture?: string | File;
+  classes_name?: number[]; 
   class_name?: number;
 }
 
@@ -44,6 +44,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
+  // Function to refresh the access token
+  const refreshToken = async () => {
+    try {
+      const response = await axios.post(
+        'http://localhost:8000/api/token/refresh/',
+        {
+          refresh: Cookies.get('refresh_token'),
+        }
+      );
+      const { access } = response.data;
+      Cookies.set('access_token', access);
+      return access;
+    } catch (error) {
+      console.error('Failed to refresh token', error);
+      return null;
+    }
+  };
+
+  // Axios interceptor to handle token expiration
+  axios.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
+      if (error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        const newAccessToken = await refreshToken();
+        if (newAccessToken) {
+          axios.defaults.headers.common[
+            'Authorization'
+          ] = `Bearer ${newAccessToken}`;
+          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+          return axios(originalRequest);
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
+
   // Define the login function
   const login = async (credentials: { email: string; password: string }) => {
     try {
@@ -51,8 +89,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         'http://localhost:8000/api/token/',
         credentials
       );
-      const { access } = response.data;
+      const { access, refresh } = response.data;
       Cookies.set('access_token', access);
+      Cookies.set('refresh_token', refresh);
 
       const userResponse = await axios.get<User>(
         'http://localhost:8000/api/user/',
@@ -113,6 +152,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     Cookies.remove('access_token');
+    Cookies.remove('refresh_token');
     setUser(null);
     router.push('/login');
   };

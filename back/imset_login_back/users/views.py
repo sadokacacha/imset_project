@@ -20,17 +20,38 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        return Response({
-            'username': user.username,
-            'role': user.role,
-            'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-        })
-    
-User = get_user_model()
+    def get(self, request, user_id=None, *args, **kwargs):
+        """
+        Retrieve user details.
+        """
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            user = request.user
+
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+    def put(self, request, user_id=None, *args, **kwargs):
+        """
+        Update user details.
+        """
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            user = request.user
+
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AdminDashboardView(APIView):

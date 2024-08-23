@@ -15,7 +15,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['role'] = user.role
         return token
 
-
     def validate(self, attrs):
         credentials = {
             'email': attrs.get('email'),
@@ -32,7 +31,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             return data
         else:
             raise serializers.ValidationError('No active account found with the given credentials')
-
 
 class ClassNameSerializer(serializers.ModelSerializer):
     class Meta:
