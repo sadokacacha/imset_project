@@ -1,0 +1,119 @@
+
+.container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  overflow: hidden;
+  
+}
+
+.redelement {
+  background-image: url('/images/red.jpg');
+  background-size: cover;
+  filter: brightness(0.5);
+  width: 5rem;
+  box-shadow: 10px 0px 15px rgba(0, 0, 0, 0.4);
+}
+
+.absoluteImage {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 300px;
+  height: auto;
+}
+
+.imageSection {
+  flex: 1.5;
+  display: flex;
+  background-image: url('/images/book.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: inset -10px 0px 30px rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+.formSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 20px;
+  position: relative;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #000000;
+  border-bottom: 3px solid #5b0e0e;
+  padding-bottom: 1rem;
+  text-align: center;
+  width: 100%;
+}
+
+.form {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.input {
+  margin-bottom: 15px;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  border-bottom: 3px solid #5b0e0e;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.signInButton,
+.connectButton {
+  padding: 12px;
+  width: 100%;
+  font-size: 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.signInButton {
+  background-color: #5b0e0e;
+  color: white;
+}
+
+.connectButton {
+  background-color: #bba0a0;
+  color: white;
+}
+
+@media screen and (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .imageSection {
+    display: none;
+  }
+
+  .formSection {
+    flex: 1;
+    padding: 40px;
+  }
+
+  .absoluteImage {
+    top: 1rem;
+    right: 1rem;
+    width: 200px;
+  }
+}
