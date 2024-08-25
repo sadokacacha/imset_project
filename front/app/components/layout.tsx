@@ -38,9 +38,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </li>
               </>
             ) : (
-              <li >
-                <Link  href="/"></Link>{' '}
-              </li>
+              
+                <Link  href="/"></Link>
+              
             )}
           </ul>
         </nav>
