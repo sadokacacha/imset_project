@@ -13,6 +13,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import UserModal from '../components/admin_modal/UserModal';
 import EditUserModal from '../components/admin_modal/EditUserModal';
+import Navbar from './Navbar';
 
 interface ClassName {
   id: number;
@@ -312,7 +313,10 @@ const renderTableRows = (users: User[]): ReactNode => {
 };
   return (
     <div>
+      
       <h1>Admin Dashboard</h1>
+      <Navbar /> 
+
       <button onClick={() => setIsModalOpen(true)}>Create User</button>
       <div>
         <button onClick={() => setActiveTab('admins')}>Admins</button>
