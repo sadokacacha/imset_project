@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import AuthContext, { AuthContextType } from '../context/AuthContext';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import Navbar from './Navbar'; 
 
 interface Class {
   id: string;
@@ -73,8 +74,8 @@ const downloadFile = async (fileId: string, fileName: string) => {
 
 return (
   <div>
+    <Navbar /> 
     <h1>
-      Welcome to the Student Dashboard,{' '}
       {user?.first_name + ' ' + user?.last_name}
     </h1>
     <h2>Your Class Files</h2>

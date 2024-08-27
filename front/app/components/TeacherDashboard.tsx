@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import Navbar from './Navbar'; 
 
 interface Class {
   id: string;
@@ -163,7 +164,7 @@ const downloadFile = async (
 
   return (
     <div>
-      <h1>Teacher Dashboard</h1>
+      <Navbar /> 
       <form onSubmit={uploadFile}>
         <input type="file" onChange={handleFileChange} required />
 

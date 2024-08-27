@@ -1,4 +1,5 @@
 from django.urls import path
+
 from .views import (
     CustomTokenObtainPairView, 
     UserDetailView, 
@@ -14,10 +15,12 @@ from .views import (
     StudentClassFilesView, 
     StudentFileDownloadView,
     UserDetailView,
+    CustomTokenRefreshView,
 )
 
 urlpatterns = [
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
     path('api/user/', UserDetailView.as_view(), name='user_detail'),
     path('api/admin/dashboard/', AdminDashboardView.as_view(), name='admin_dashboard'),
     path('api/admin/create-user/', UserCreateView.as_view(), name='create_user'),

@@ -19,23 +19,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {user ? (
               <>
                 {user.role === 'admin' && (
-                  <li>
-                    <Link href="/admin/dashboard">Admin Dashboard</Link>
-                  </li>
+                  <>
+                    <Link href="/admin/dashboard"></Link>
+                  </>
                 )}
                 {user.role === 'teacher' && (
-                  <li>
-                    <Link href="/teacher/dashboard">Teacher Dashboard</Link>
-                  </li>
+                  <>
+                    <Link href="/teacher/dashboard"></Link>
+                  </>
                 )}
                 {user.role === 'student' && (
-                  <li>
-                    <Link href="/student/dashboard">Student Dashboard</Link>
-                  </li>
+                  <>
+                    <Link href="/student/dashboard"></Link>
+                  </>
                 )}
-                <li>
-                  <button onClick={logout}>Logout</button>
-                </li>
+
               </>
             ) : (
               

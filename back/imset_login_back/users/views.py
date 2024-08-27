@@ -1,3 +1,4 @@
+
 from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.response import Response
@@ -11,11 +12,14 @@ from django.http import HttpResponse, Http404
 from django.utils.encoding import smart_str
 from django.db import IntegrityError
 from mimetypes import guess_type
+from rest_framework_simplejwt.views import TokenRefreshView
 
 import logging
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+class CustomTokenRefreshView(TokenRefreshView):
+    pass
 
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]

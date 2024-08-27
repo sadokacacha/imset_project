@@ -1,0 +1,141 @@
+.dashboard {
+    display: flex;
+    height: 100vh;
+  }
+/*   
+  .sidebar {
+    width: 250px;
+    background-color: #3c0000;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+
+  } */
+  
+  
+.envoyer{
+    background-color: #5a0202;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 17px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+    position: absolute;
+    left: 26rem;
+}
+
+ 
+  
+  .main {
+    flex: 1;
+    padding: 20px;
+    background-color: white;
+    display: grid;
+    align-content: space-between;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .content {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .chatbot {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    max-width: 500px;
+    margin-top: 20px;
+  }
+  
+  .chatHeader {
+    background-color: #660000;
+    color: white;
+    padding: 10px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    font-weight: bold; 
+    cursor: pointer;
+  }  
+  .chatBody {
+    padding: 10px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .message {
+    background-color: #f0f0f0;
+    padding: 10px;
+    color: #000000;
+    margin: 5px 0;
+    border-radius: 8px;
+  }
+  .userMessage {
+    background-color: #b1c7f3;
+    padding: 10px;
+    margin: 5px 0;
+    color: #000000;
+    border-radius: 8px;
+    /* text-align: right; */
+  }
+  
+  .botMessage {
+    background-color: #f0f0f0;
+    padding: 10px;
+    color: #000000;
+    margin: 5px 0;
+    border-radius: 8px;
+  }
+  
+  .chatFooter {
+    border-top: 1px solid #ccc;
+    padding: 10px;
+  }
+  
+  .chatFooter input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    border: none;
+  }
+  
+  .chatbotContainer {
+    position: relative;
+  }
+  
+  .toggleButton {
+    background-color: rgb(102, 0, 0);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .toggleButton:hover {
+    background-color: #990000;
+  }
+  
