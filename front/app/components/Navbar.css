@@ -16,10 +16,18 @@
 }
 
 .link {
-  color: #e8e8e8; /* Facebook blue */
+  color: #e8e8e8;
   text-decoration: none;
   font-weight: bold;
 }
+
+.link_login{
+  color: #e8e8e8;
+  font-weight: bold;
+  border: none;
+  background: none;
+}
+
 
 .link:hover {
   text-decoration: underline;

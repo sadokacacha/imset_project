@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
           <li><Link className="link" href="/Settings">Setting</Link></li> 
           <li><Link className="link" href="/Help">Help</Link></li> 
           <li><Link className="link" href="/TestYourSkills">Test your skills</Link></li> 
-          <button className="logout-button" onClick={logout}>Log out</button>
+          <button className="link_login" onClick={logout}>Log out</button>
         </ul>
       </nav>
     </aside>
