@@ -22,11 +22,12 @@ class UserManager(BaseUserManager):
 
 
 class ClassName(models.Model):
+    id = models.AutoField(primary_key=True)  # Add this line
     name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
-
+    
 class User(AbstractUser):
     ROLES = (
         ('admin', 'Admin'),

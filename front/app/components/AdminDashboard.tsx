@@ -56,14 +56,21 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     'admins' | 'teachers' | 'students'
   >('admins');
-  const [filters, setFilters] = useState({
-    id: '',
-    name: '',
-    email: '',
-    date_of_birth: '',
-    classes_name: '',
-  });
-
+const [filters, setFilters] = useState<{
+  id: string;
+  name: string;
+  email: string;
+  date_of_birth: string;
+  classes_name: string;
+  class_name: string;
+}>({
+  id: '',
+  name: '',
+  email: '',
+  date_of_birth: '',
+  classes_name: '',
+  class_name: '',
+});
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -79,26 +86,26 @@ const AdminDashboard: React.FC = () => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const fetchDashboardData = async () => {
-    try {
-      const accessToken = Cookies.get('access_token');
-      const [dashboardResponse, classesResponse] = await Promise.all([
-        axios.get('http://localhost:8000/api/admin/dashboard/', {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-        axios.get('http://localhost:8000/api/classes/', {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-      ]);
+const fetchDashboardData = async () => {
+  try {
+    const accessToken = Cookies.get('access_token');
+    const [dashboardResponse, classesResponse] = await Promise.all([
+      axios.get('http://localhost:8000/api/admin/dashboard/', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }),
+      axios.get('http://localhost:8000/api/classes/', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }),
+    ]);
 
-      setAdmins(dashboardResponse.data.admins || []);
-      setTeachers(dashboardResponse.data.teachers || []);
-      setStudents(dashboardResponse.data.students || []);
-      setClasses(classesResponse.data || []);
-    } catch (error) {
-      console.error('Failed to fetch dashboard data', error);
-    }
-  };
+    setAdmins(dashboardResponse.data.admins || []);
+    setTeachers(dashboardResponse.data.teachers || []);
+    setStudents(dashboardResponse.data.students || []);
+    setClasses(classesResponse.data || []);
+  } catch (error) {
+    console.error('Failed to fetch dashboard data', error);
+  }
+};
 
   // Function to open the edit modal
   const openEditModal = (user: User) => {
@@ -106,18 +113,16 @@ const AdminDashboard: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
-  // Function to map class IDs to class names
-  const getClassNamesByIds = (ids: number[] = []): string[] => {
-    return ids
-      .map((id) => classes.find((cls) => cls.id === id)?.name)
-      .filter(Boolean) as string[];
-  };
+const getClassNamesByIds = (ids: number[] = []): string[] => {
+  return ids
+    .map((id) => classes.find((cls) => cls.id === id)?.name || '')
+    .filter(Boolean) as string[];
+};
 
-  // For students, find the class name by ID
-  const getClassNameById = (id: number | undefined): string | undefined => {
-    if (id === undefined) return undefined;
-    return classes.find((cls) => cls.id === id)?.name;
-  };
+const getClassNameById = (id: number | undefined): string | undefined => {
+  if (id === undefined) return undefined;
+  return classes.find((cls) => cls.id === id)?.name;
+};
 
   const deleteUser = async (userId: number) => {
     try {
@@ -159,27 +164,32 @@ const AdminDashboard: React.FC = () => {
     setFilters({ ...filters, [name]: value });
   };
 
-  const applyFilters = (users: User[]): User[] => {
-    return users.filter((user) => {
-      return (
-        (!filters.id || user.id.toString().includes(filters.id)) &&
-        (!filters.name ||
-          user.first_name.toLowerCase().includes(filters.name.toLowerCase()) ||
-          user.last_name.toLowerCase().includes(filters.name.toLowerCase())) &&
-        (!filters.email ||
-          user.email.toLowerCase().includes(filters.email.toLowerCase())) &&
-        (!filters.date_of_birth ||
-          (user.date_of_birth &&
-            user.date_of_birth.includes(filters.date_of_birth))) &&
-        (!filters.classes_name ||
-          (user.classes_name &&
-            getClassNamesByIds(user.classes_name)
-              .join(', ')
-              .toLowerCase()
-              .includes(filters.classes_name.toLowerCase())))
-      );
-    });
-  };
+const applyFilters = (users: User[]): User[] => {
+  return users.filter((user) => {
+    return (
+      (!filters.id || user.id.toString().includes(filters.id)) &&
+      (!filters.name ||
+        user.first_name.toLowerCase().includes(filters.name.toLowerCase()) ||
+        user.last_name.toLowerCase().includes(filters.name.toLowerCase())) &&
+      (!filters.email ||
+        user.email.toLowerCase().includes(filters.email.toLowerCase())) &&
+      (!filters.date_of_birth ||
+        (user.date_of_birth &&
+          user.date_of_birth.includes(filters.date_of_birth))) &&
+      (!filters.classes_name ||
+        (user.classes_name &&
+          getClassNamesByIds(user.classes_name)
+            .join(', ')
+            .toLowerCase()
+            .includes(filters.classes_name.toLowerCase()))) &&
+      (!filters.class_name ||
+        (user.class_name &&
+          getClassNameById(user.class_name)
+            ?.toLowerCase()
+            .includes(filters.class_name.toLowerCase())))
+    );
+  });
+};
 
   const createUser = async (e: FormEvent) => {
     e.preventDefault();
@@ -276,234 +286,191 @@ const AdminDashboard: React.FC = () => {
     setSelectedUser(user);
     setIsUserModalOpen(true); // Corrected this line
   };
+
 const renderTableRows = (users: User[]): ReactNode => {
-  return users.map((user) => {
-    const formattedDate = user.date_of_birth
-      ? new Date(user.date_of_birth).toLocaleDateString()
-      : '-';
-
-    const classInfo =
-      user.role === 'teacher'
-        ? getClassNamesByIds(user.classes_name).join(', ')
-        : user.role === 'student'
-        ? getClassNameById(user.class_name) || '-'
-        : '-';
-
-    return (
-      <tr key={user.id}>
-        <td>{user.id}</td>
-        <td>
-          {user.first_name} {user.last_name}
-        </td>
-        <td>{user.email}</td>
-        <td>{formattedDate}</td>
-        <td>{classInfo}</td>
-        <td>
-          <button onClick={() => deleteUser(user.id)}>Delete</button>
-        </td>
-        <td>
-          <button onClick={() => openUserModal(user)}>View</button>
-        </td>
-        <td>
-          <button onClick={() => openEditModal(user)}>Edit</button>
-        </td>
-      </tr>
-    );
-  });
+  return users.map((user) => (
+    <tr key={user.id} className="hover:bg-gray-100">
+      <td className="border px-4 py-2">{user.id}</td>
+      <td className="border px-4 py-2">
+        {user.first_name} {user.last_name}
+      </td>
+      <td className="border px-4 py-2">{user.email}</td>
+      <td className="border px-4 py-2">{user.date_of_birth}</td>
+      <td className="border px-4 py-2">
+        {user.role === 'teacher'
+          ? getClassNamesByIds(user.classes_name).join(', ')
+          : user.role === 'student'
+          ? getClassNameById(user.class_name)
+          : ''}
+      </td>
+      <td className="border px-4 py-2">
+        <button
+          onClick={() => openEditModal(user)}
+          className="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => deleteUser(user.id)}
+          className="bg-red-500 hover:bg-red-700 text-black font-bold py-2 px-4 rounded ml-2"
+        >
+          Delete
+        </button>
+        <button
+          onClick={() => openUserModal(user)}
+          className="bg-green-500 hover:bg-green-700 text-black font-bold py-2 px-4 rounded ml-2"
+        >
+          View
+        </button>
+      </td>
+    </tr>
+  ));
 };
+
   return (
-    <div>
-      
-      <h1>Admin Dashboard</h1>
-      <Navbar /> 
+    <div className="flex h-screen">
+      <Navbar />
 
-      <button onClick={() => setIsModalOpen(true)}>Create User</button>
-      <div>
-        <button onClick={() => setActiveTab('admins')}>Admins</button>
-        <button onClick={() => setActiveTab('teachers')}>Teachers</button>
-        <button onClick={() => setActiveTab('students')}>Students</button>
+      <div className="flex-1 p-6 overflow-auto">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4"
+        >
+          Create User
+        </button>
+
+        <div className="mb-4">
+          <button
+            onClick={() => setActiveTab('admins')}
+            className={`mr-4 ${activeTab === 'admins' ? 'font-bold' : ''}`}
+          >
+            Admins
+          </button>
+          <button
+            onClick={() => setActiveTab('teachers')}
+            className={`mr-4 ${activeTab === 'teachers' ? 'font-bold' : ''}`}
+          >
+            Teachers
+          </button>
+          <button
+            onClick={() => setActiveTab('students')}
+            className={`${activeTab === 'students' ? 'font-bold' : ''}`}
+          >
+            Students
+          </button>
+        </div>
+
+        <div className="mb-4 flex gap-4">
+          <input
+            type="text"
+            name="id"
+            placeholder="Filter by ID"
+            value={filters.id}
+            onChange={handleFilterChange}
+            className="border rounded p-2"
+          />
+          <input
+            type="text"
+            name="name"
+            placeholder="Filter by Name"
+            value={filters.name}
+            onChange={handleFilterChange}
+            className="border rounded p-2"
+          />
+          <input
+            type="text"
+            name="email"
+            placeholder="Filter by Email"
+            value={filters.email}
+            onChange={handleFilterChange}
+            className="border rounded p-2"
+          />
+          <input
+            type="text"
+            name="date_of_birth"
+            placeholder="Filter by Date of Birth"
+            value={filters.date_of_birth}
+            onChange={handleFilterChange}
+            className="border rounded p-2"
+          />
+          <input
+            type="text"
+            name="classes_name"
+            placeholder="Filter by Class"
+            value={filters.classes_name}
+            onChange={handleFilterChange}
+            className="border rounded p-2"
+          />
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full border">
+            <thead>
+              <tr>
+                <th className="border px-4 py-2">ID</th>
+                <th className="border px-4 py-2">Name</th>
+                <th className="border px-4 py-2">Email</th>
+                <th className="border px-4 py-2">Date of Birth</th>
+                <th className="border px-4 py-2">Class</th>
+                <th className="border px-4 py-2">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activeTab === 'admins' && renderTableRows(paginatedAdmins)}
+              {activeTab === 'teachers' && renderTableRows(paginatedTeachers)}
+              {activeTab === 'students' && renderTableRows(paginatedStudents)}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 flex justify-between">
+          <button
+            onClick={prevPage}
+            disabled={currentPage === 1}
+            className="bg-gray-500 text-black font-bold py-2 px-4 rounded"
+          >
+            Previous
+          </button>
+          <button
+            onClick={nextPage}
+            disabled={
+              (activeTab === 'admins' && endIndex >= filteredAdmins.length) ||
+              (activeTab === 'teachers' &&
+                endIndex >= filteredTeachers.length) ||
+              (activeTab === 'students' && endIndex >= filteredStudents.length)
+            }
+            className="bg-gray-500 text-black font-bold py-2 px-4 rounded"
+          >
+            Next
+          </button>
+        </div>
       </div>
-      <div>
-        <input
-          type="text"
-          name="id"
-          placeholder="Filter by ID"
-          value={filters.id}
-          onChange={handleFilterChange}
-        />
-        <input
-          type="text"
-          name="name"
-          placeholder="Filter by Name"
-          value={filters.name}
-          onChange={handleFilterChange}
-        />
-        <input
-          type="text"
-          name="email"
-          placeholder="Filter by Email"
-          value={filters.email}
-          onChange={handleFilterChange}
-        />
-        <input
-          type="text"
-          name="date_of_birth"
-          placeholder="Filter by Date of Birth"
-          value={filters.date_of_birth}
-          onChange={handleFilterChange}
-        />
-        <input
-          type="text"
-          name="classes_name"
-          placeholder="Filter by Class"
-          value={filters.classes_name}
-          onChange={handleFilterChange}
-        />
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Date of Birth</th>
-            <th>Class</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {activeTab === 'admins' && renderTableRows(paginatedAdmins)}
-          {activeTab === 'teachers' && renderTableRows(paginatedTeachers)}
-          {activeTab === 'students' && renderTableRows(paginatedStudents)}
-        </tbody>
-      </table>
-      <button onClick={prevPage} disabled={currentPage === 1}>
-        Previous
-      </button>
-      <button
-        onClick={nextPage}
-        disabled={
-          (activeTab === 'admins' && endIndex >= filteredAdmins.length) ||
-          (activeTab === 'teachers' && endIndex >= filteredTeachers.length) ||
-          (activeTab === 'students' && endIndex >= filteredStudents.length)
-        }
-      >
-        Next
-      </button>
+
+      {/* Modal components */}
       {isModalOpen && (
-        <div>
-          <h2>Create User</h2>
-          <form onSubmit={createUser}>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={newUser.email}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={newUser.password}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              name="first_name"
-              placeholder="First Name"
-              value={newUser.first_name}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              name="last_name"
-              placeholder="Last Name"
-              value={newUser.last_name}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="date"
-              name="date_of_birth"
-              value={newUser.date_of_birth}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              name="id_card_or_passport"
-              placeholder="ID Card/Passport"
-              value={newUser.id_card_or_passport}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Phone"
-              value={newUser.phone}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="file"
-              name="picture"
-              onChange={handleChange}
-              accept="image/*"
-              required
-            />
-            <select
-              name="role"
-              value={newUser.role}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Role</option>
-              <option value="admin">Admin</option>
-              <option value="teacher">Teacher</option>
-              <option value="student">Student</option>
-            </select>
-
-            {newUser.role === 'teacher' && (
-              <select
-                multiple
-                name="classes_name"
-                value={newUser.classes_name.map(String)}
-                onChange={handleChange}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <h2 className="text-xl font-bold mb-4">Create User</h2>
+            <form onSubmit={createUser}>
+              {/* Form fields */}
+              {/* ... */}
+              <button
+                type="submit"
+                className="bg-green-500 text-black font-bold py-2 px-4 rounded"
               >
-                {classes.map((cls) => (
-                  <option key={cls.id} value={cls.id}>
-                    {cls.name}
-                  </option>
-                ))}
-              </select>
-            )}
-
-            {newUser.role === 'student' && (
-              <select
-                name="class_name"
-                value={newUser.class_name}
-                onChange={handleChange}
-                required
+                Create
+              </button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="ml-4 bg-red-500 text-black font-bold py-2 px-4 rounded"
               >
-                <option value="">Select Class</option>
-                {classes.map((cls) => (
-                  <option key={cls.id} value={cls.id}>
-                    {cls.name}
-                  </option>
-                ))}
-              </select>
-            )}
-
-            <button type="submit">Create</button>
-            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
-          </form>
+                Cancel
+              </button>
+            </form>
+          </div>
         </div>
       )}
+
       <EditUserModal
         show={isEditModalOpen}
         handleClose={() => setIsEditModalOpen(false)}
@@ -511,13 +478,13 @@ const renderTableRows = (users: User[]): ReactNode => {
         classes={classes}
         fetchDashboardData={fetchDashboardData}
       />
-      ;
+
       <UserModal
         show={isUserModalOpen}
         handleClose={() => setIsUserModalOpen(false)}
         user={selectedUser}
         getClassNamesByIds={getClassNamesByIds}
-        getClassNameById={getClassNameById} // Pass this function
+        getClassNameById={getClassNameById}
       />
     </div>
   );

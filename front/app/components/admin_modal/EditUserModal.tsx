@@ -163,7 +163,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             <select
               multiple
               name="classes_name"
-              value={editedUser.classes_name.map(String)}
+              value={editedUser.classes_name?.map(String) || []}
               onChange={handleChange}
             >
               {classes.map((cls) => (

@@ -35,7 +35,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class ClassNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassName
-        fields = ['id', 'name']
+        fields = ['name']  
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -43,7 +44,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'role', 'first_name', 'last_name', 'picture']
+        fields = '__all__'
+
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -71,6 +73,15 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+    def update(self, instance, validated_data):
+        # Handle updating fields normally
+        for attr, value in validated_data.items():
+            if attr == 'picture' and value:
+                instance.picture = value
+            else:
+                setattr(instance, attr, value)
+        instance.save()
+        return instance
         
 class UploadedFileSerializer(serializers.ModelSerializer):
     fileType = serializers.SerializerMethodField()
