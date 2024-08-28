@@ -101,7 +101,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
       setUser(userResponse.data);
 
-      // Redirect based on role
       const userRole = userResponse.data.role;
       if (userRole === 'admin') {
         router.push('/admin/dashboard');

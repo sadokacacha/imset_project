@@ -44,7 +44,7 @@ class User(AbstractUser):
     classes_name = models.ManyToManyField(ClassName, blank=True, related_name='teachers')
     class_name = models.ForeignKey(ClassName, null=True, blank=True, related_name='students', on_delete=models.SET_NULL)
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']  # Make first_name and last_name required
+    REQUIRED_FIELDS = ['first_name', 'last_name']  
 
     objects = UserManager()
 
