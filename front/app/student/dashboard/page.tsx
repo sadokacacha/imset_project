@@ -1,5 +1,5 @@
 import ProtectedRoute from '../../components/ProtectedRoute';
-import StudentDashboard from '../../components/StudentDashboard';
+import StudentDashboard from './StudentDashboard';
 
 const StudentDashboardPage: React.FC = () => {
   return (

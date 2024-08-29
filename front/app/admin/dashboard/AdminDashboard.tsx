@@ -1,5 +1,7 @@
 'use client';
+
 import React from 'react';
+
 import {
   useContext,
   useState,
@@ -8,12 +10,13 @@ import {
   FormEvent,
   ReactNode,
 } from 'react';
-import AuthContext, { AuthContextType, User } from '../context/AuthContext';
+
+import AuthContext, { AuthContextType, User } from '../../context/AuthContext';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import UserModal from '../components/admin_modal/UserModal';
-import EditUserModal from '../components/admin_modal/EditUserModal';
-import Navbar from './Navbar';
+import UserModal from './admin_modal/UserModal';
+import EditUserModal from './admin_modal/EditUserModal';
+import Navbar from '../../components/Navbar';
 
 interface ClassName {
   id: number;
@@ -56,21 +59,21 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     'admins' | 'teachers' | 'students'
   >('admins');
-const [filters, setFilters] = useState<{
-  id: string;
-  name: string;
-  email: string;
-  date_of_birth: string;
-  classes_name: string;
-  class_name: string;
-}>({
-  id: '',
-  name: '',
-  email: '',
-  date_of_birth: '',
-  classes_name: '',
-  class_name: '',
-});
+  const [filters, setFilters] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    date_of_birth: string;
+    classes_name: string;
+    class_name: string;
+  }>({
+    id: '',
+    name: '',
+    email: '',
+    date_of_birth: '',
+    classes_name: '',
+    class_name: '',
+  });
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -86,26 +89,26 @@ const [filters, setFilters] = useState<{
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-const fetchDashboardData = async () => {
-  try {
-    const accessToken = Cookies.get('access_token');
-    const [dashboardResponse, classesResponse] = await Promise.all([
-      axios.get('http://localhost:8000/api/admin/dashboard/', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }),
-      axios.get('http://localhost:8000/api/classes/', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }),
-    ]);
+  const fetchDashboardData = async () => {
+    try {
+      const accessToken = Cookies.get('access_token');
+      const [dashboardResponse, classesResponse] = await Promise.all([
+        axios.get('http://localhost:8000/api/admin/dashboard/', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+        axios.get('http://localhost:8000/api/classes/', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      ]);
 
-    setAdmins(dashboardResponse.data.admins || []);
-    setTeachers(dashboardResponse.data.teachers || []);
-    setStudents(dashboardResponse.data.students || []);
-    setClasses(classesResponse.data || []);
-  } catch (error) {
-    console.error('Failed to fetch dashboard data', error);
-  }
-};
+      setAdmins(dashboardResponse.data.admins || []);
+      setTeachers(dashboardResponse.data.teachers || []);
+      setStudents(dashboardResponse.data.students || []);
+      setClasses(classesResponse.data || []);
+    } catch (error) {
+      console.error('Failed to fetch dashboard data', error);
+    }
+  };
 
   // Function to open the edit modal
   const openEditModal = (user: User) => {
@@ -113,16 +116,17 @@ const fetchDashboardData = async () => {
     setIsEditModalOpen(true);
   };
 
-const getClassNamesByIds = (ids: number[] = []): string[] => {
-  return ids
-    .map((id) => classes.find((cls) => cls.id === id)?.name || '')
-    .filter(Boolean) as string[];
-};
+  const getClassNamesByIds = (ids: number[] = []): string[] => {
+    return ids
+      .map((id) => classes.find((cls) => cls.id === id)?.name)
+      .filter(Boolean) as string[];
+  };
 
-const getClassNameById = (id: number | undefined): string | undefined => {
-  if (id === undefined) return undefined;
-  return classes.find((cls) => cls.id === id)?.name;
-};
+  // For students, find the class name by ID
+  const getClassNameById = (id: number | undefined): string | undefined => {
+    if (id === undefined) return undefined;
+    return classes.find((cls) => cls.id === id)?.name;
+  };
 
   const deleteUser = async (userId: number) => {
     try {
@@ -164,32 +168,32 @@ const getClassNameById = (id: number | undefined): string | undefined => {
     setFilters({ ...filters, [name]: value });
   };
 
-const applyFilters = (users: User[]): User[] => {
-  return users.filter((user) => {
-    return (
-      (!filters.id || user.id.toString().includes(filters.id)) &&
-      (!filters.name ||
-        user.first_name.toLowerCase().includes(filters.name.toLowerCase()) ||
-        user.last_name.toLowerCase().includes(filters.name.toLowerCase())) &&
-      (!filters.email ||
-        user.email.toLowerCase().includes(filters.email.toLowerCase())) &&
-      (!filters.date_of_birth ||
-        (user.date_of_birth &&
-          user.date_of_birth.includes(filters.date_of_birth))) &&
-      (!filters.classes_name ||
-        (user.classes_name &&
-          getClassNamesByIds(user.classes_name)
-            .join(', ')
-            .toLowerCase()
-            .includes(filters.classes_name.toLowerCase()))) &&
-      (!filters.class_name ||
-        (user.class_name &&
-          getClassNameById(user.class_name)
-            ?.toLowerCase()
-            .includes(filters.class_name.toLowerCase())))
-    );
-  });
-};
+  const applyFilters = (users: User[]): User[] => {
+    return users.filter((user) => {
+      return (
+        (!filters.id || user.id.toString().includes(filters.id)) &&
+        (!filters.name ||
+          user.first_name.toLowerCase().includes(filters.name.toLowerCase()) ||
+          user.last_name.toLowerCase().includes(filters.name.toLowerCase())) &&
+        (!filters.email ||
+          user.email.toLowerCase().includes(filters.email.toLowerCase())) &&
+        (!filters.date_of_birth ||
+          (user.date_of_birth &&
+            user.date_of_birth.includes(filters.date_of_birth))) &&
+        (!filters.classes_name ||
+          (user.classes_name &&
+            getClassNamesByIds(user.classes_name)
+              .join(', ')
+              .toLowerCase()
+              .includes(filters.classes_name.toLowerCase()))) &&
+        (!filters.class_name ||
+          (user.class_name &&
+            getClassNameById(user.class_name)
+              ?.toLowerCase()
+              .includes(filters.class_name.toLowerCase())))
+      );
+    });
+  };
 
   const createUser = async (e: FormEvent) => {
     e.preventDefault();
@@ -205,6 +209,8 @@ const applyFilters = (users: User[]): User[] => {
           formData.append(key, value as string | Blob);
         }
       });
+
+      console.log('Form data being sent:', Array.from(formData.entries())); // Add this line
 
       await axios.post(
         'http://localhost:8000/api/admin/create-user/',
@@ -287,47 +293,49 @@ const applyFilters = (users: User[]): User[] => {
     setIsUserModalOpen(true); // Corrected this line
   };
 
-const renderTableRows = (users: User[]): ReactNode => {
-  return users.map((user) => (
-    <tr key={user.id} className="hover:bg-gray-100">
-      <td className="border px-4 py-2">{user.id}</td>
-      <td className="border px-4 py-2">
-        {user.first_name} {user.last_name}
-      </td>
-      <td className="border px-4 py-2">{user.email}</td>
-      <td className="border px-4 py-2">{user.date_of_birth}</td>
-      <td className="border px-4 py-2">
-        {user.role === 'teacher'
-          ? getClassNamesByIds(user.classes_name).join(', ')
-          : user.role === 'student'
-          ? getClassNameById(user.class_name)
-          : ''}
-      </td>
-      <td className="border px-4 py-2">
-        <button
-          onClick={() => openEditModal(user)}
-          className="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded"
-        >
-          Edit
-        </button>
-        <button
-          onClick={() => deleteUser(user.id)}
-          className="bg-red-500 hover:bg-red-700 text-black font-bold py-2 px-4 rounded ml-2"
-        >
-          Delete
-        </button>
-        <button
-          onClick={() => openUserModal(user)}
-          className="bg-green-500 hover:bg-green-700 text-black font-bold py-2 px-4 rounded ml-2"
-        >
-          View
-        </button>
-      </td>
-    </tr>
-  ));
-};
+  const renderTableRows = (users: User[]): ReactNode => {
+    return users.map((user) => (
+      <tr key={user.id} className="hover:bg-gray-100">
+        <td className="border px-4 py-2">{user.id}</td>
+        <td className="border px-4 py-2">
+          {user.first_name} {user.last_name}
+        </td>
+        <td className="border px-4 py-2">{user.email}</td>
+        <td className="border px-4 py-2">{user.date_of_birth}</td>
+        <td className="border px-4 py-2">
+          {user.role === 'teacher'
+            ? getClassNamesByIds(user.classes_name).join(', ')
+            : ''}
+        </td>
+        <td className="border px-4 py-2">
+          {user.role === 'student' ? getClassNameById(user.class_name) : ''}
+        </td>
+        <td className="border px-4 py-2">
+          <button
+            onClick={() => openEditModal(user)}
+            className="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => deleteUser(user.id)}
+            className="bg-red-500 hover:bg-red-700 text-black font-bold py-2 px-4 rounded ml-2"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => openUserModal(user)}
+            className="bg-green-500 hover:bg-green-700 text-black font-bold py-2 px-4 rounded ml-2"
+          >
+            View
+          </button>
+        </td>
+      </tr>
+    ));
+  };
 
   return (
+    
     <div className="flex h-screen">
       <Navbar />
 
@@ -452,20 +460,113 @@ const renderTableRows = (users: User[]): ReactNode => {
           <div className="bg-white p-6 rounded shadow-lg">
             <h2 className="text-xl font-bold mb-4">Create User</h2>
             <form onSubmit={createUser}>
-              {/* Form fields */}
-              {/* ... */}
-              <button
-                type="submit"
-                className="bg-green-500 text-black font-bold py-2 px-4 rounded"
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={newUser.email}
+                onChange={handleChange}
+                required
+              />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={newUser.password}
+                onChange={handleChange}
+                required
+              />
+              <input
+                type="text"
+                name="first_name"
+                placeholder="First Name"
+                value={newUser.first_name}
+                onChange={handleChange}
+                required
+              />
+              <input
+                type="text"
+                name="last_name"
+                placeholder="Last Name"
+                value={newUser.last_name}
+                onChange={handleChange}
+                required
+              />
+              <input
+                type="date"
+                name="date_of_birth"
+                value={newUser.date_of_birth}
+                onChange={handleChange}
+                required
+              />
+              <input
+                type="text"
+                name="id_card_or_passport"
+                placeholder="ID Card/Passport"
+                value={newUser.id_card_or_passport}
+                onChange={handleChange}
+                required
+              />
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Phone"
+                value={newUser.phone}
+                onChange={handleChange}
+                required
+              />
+              <input
+                type="file"
+                name="picture"
+                onChange={handleChange}
+                accept="image/*"
+                required
+              />
+              <select
+                name="role"
+                value={newUser.role}
+                onChange={handleChange}
+                required
               >
-                Create
-              </button>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="ml-4 bg-red-500 text-black font-bold py-2 px-4 rounded"
-              >
-                Cancel
-              </button>
+                <option value="">Select Role</option>
+                <option value="admin">Admin</option>
+                <option value="teacher">Teacher</option>
+                <option value="student">Student</option>
+              </select>
+
+              {newUser.role === 'teacher' && (
+                <select
+                  multiple
+                  name="classes_name"
+                  value={newUser.classes_name.map(String)}
+                  onChange={handleChange}
+                >
+                  {classes.map((cls) => (
+                    <option key={cls.id} value={cls.id}>
+                      {cls.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {newUser.role === 'student' && (
+                <select
+                  name="class_name"
+                  value={newUser.class_name}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Class</option>
+                  {classes.map((cls) => (
+                    <option key={cls.id} value={cls.id}>
+                      {cls.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              <button type="submit">Create</button>
+              <button onClick={() => setIsModalOpen(false)}>Cancel</button>
             </form>
           </div>
         </div>

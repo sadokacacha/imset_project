@@ -1,9 +1,9 @@
 'use client';
 import { useContext, useEffect, useState } from 'react';
-import AuthContext, { AuthContextType } from '../context/AuthContext';
+import AuthContext, { AuthContextType } from '../../context/AuthContext';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import Navbar from './Navbar'; 
+import Navbar from '../../components/Navbar'; 
 
 interface Class {
   id: string;

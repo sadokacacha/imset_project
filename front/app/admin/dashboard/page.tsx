@@ -1,5 +1,5 @@
 import ProtectedRoute from '../../components/ProtectedRoute';
-import AdminDashboard from '../../components/AdminDashboard';
+import AdminDashboard from './AdminDashboard';
 
 const AdminDashboardPage = () => {
   return (

@@ -22,12 +22,11 @@ class UserManager(BaseUserManager):
 
 
 class ClassName(models.Model):
-    id = models.AutoField(primary_key=True)  # Add this line
     name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
-    
+
 class User(AbstractUser):
     ROLES = (
         ('admin', 'Admin'),
@@ -44,7 +43,7 @@ class User(AbstractUser):
     classes_name = models.ManyToManyField(ClassName, blank=True, related_name='teachers')
     class_name = models.ForeignKey(ClassName, null=True, blank=True, related_name='students', on_delete=models.SET_NULL)
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']  
+    REQUIRED_FIELDS = ['first_name', 'last_name']  # Make first_name and last_name required
 
     objects = UserManager()
 

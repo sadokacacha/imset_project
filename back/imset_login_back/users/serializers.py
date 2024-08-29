@@ -35,7 +35,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class ClassNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassName
-        fields = ['name']  
+        fields = ['id', 'name']
 
 
 
@@ -44,7 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['id', 'email', 'role', 'first_name', 'last_name', 'picture']
 
 
     def to_representation(self, instance):
@@ -73,6 +73,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+    
     def update(self, instance, validated_data):
         # Handle updating fields normally
         for attr, value in validated_data.items():

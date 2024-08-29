@@ -1,10 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext } from 'react';
 import Link from 'next/link';
 import AuthContext, { AuthContextType } from '../context/AuthContext';
-import "./Navbar.css";
+import './Navbar.css';
 
 const Navbar: React.FC = () => {
-  const { logout } = useContext(AuthContext) as AuthContextType;
+  const { user, logout } = useContext(AuthContext) as AuthContextType;
 
   return (
     <aside className="sidebar">
@@ -13,21 +13,65 @@ const Navbar: React.FC = () => {
       </div>
       <nav className="nav">
         <ul>
-          <li><Link className="link" href="/">Dashboard</Link></li>
-          <li><Link className="link" href="">Profile</Link></li>
-          <li><Link className="link" href="/Resumer">Documents</Link></li>
-          <li><Link className="link" href="">Note</Link></li>
-          <li><Link className="link" href="/Speakpdf">Chat Ai</Link></li> 
-          <li><Link className="link" href="/Calendrier">Calendrier</Link></li> 
-          <li><Link className="link" href="/Messages">Message</Link></li> 
-          <li><Link className="link" href="/Settings">Setting</Link></li> 
-          <li><Link className="link" href="/Help">Help</Link></li> 
-          <li><Link className="link" href="/TestYourSkills">Test your skills</Link></li> 
-          <button className="link_login" onClick={logout}>Log out</button>
+          <li>
+            <Link className="link" href="/Profile">
+              Profile
+            </Link>
+          </li>
+
+          {user?.role === 'admin' && (
+            <>
+              <li>
+                <Link className="link" href="/admin/AdminUserTab">
+                  Manage Users
+                </Link>
+              </li>
+
+              <li>
+                <Link className="link" href="/admin/dashboard">
+                  view resume
+                </Link>
+              </li>
+            </>
+          )}
+
+          {user?.role === 'teacher' && (
+            <li>
+              <Link className="link" href="">
+                add files
+              </Link>
+            </li>
+          )}
+
+          {user?.role === 'student' && (
+            <>
+              <li>
+                <Link className="link" href="/Speakpdf">
+                  Resume
+                </Link>
+              </li>
+
+              <li>
+                <Link className="link" href="/Speakpdf">
+                  Chat AI
+                </Link>
+              </li>
+
+              <li>
+                <Link className="link" href="/TestYourSkills">
+                  Test your skills
+                </Link>
+              </li>
+            </>
+          )}
+
+          <button className="link_login" onClick={logout}>
+            Log out
+          </button>
         </ul>
       </nav>
     </aside>
   );
-}
+};
 
 export default Navbar;

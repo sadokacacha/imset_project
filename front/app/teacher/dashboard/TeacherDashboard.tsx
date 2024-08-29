@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import Navbar from './Navbar'; 
+import Navbar from '../../components/Navbar';
 
 interface Class {
   id: string;
@@ -119,52 +119,52 @@ const TeacherDashboard: React.FC = () => {
     }
   };
 
-const downloadFile = async (
-  fileId: string,
-  fileName: string
-): Promise<void> => {
-  const accessToken = Cookies.get('access_token');
-  if (!accessToken) {
-    console.error('No access token found.');
-    alert('Failed to download file');
-    return;
-  }
+  const downloadFile = async (
+    fileId: string,
+    fileName: string
+  ): Promise<void> => {
+    const accessToken = Cookies.get('access_token');
+    if (!accessToken) {
+      console.error('No access token found.');
+      alert('Failed to download file');
+      return;
+    }
 
-  try {
-    const response = await axios.get<Blob>(
-      `http://localhost:8000/api/teacher/download-file/${fileId}/`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        responseType: 'blob', // Important for downloading files
-      }
-    );
+    try {
+      const response = await axios.get<Blob>(
+        `http://localhost:8000/api/teacher/download-file/${fileId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          responseType: 'blob', // Important for downloading files
+        }
+      );
 
-    // Create a URL for the file blob
-    const url = window.URL.createObjectURL(response.data);
+      // Create a URL for the file blob
+      const url = window.URL.createObjectURL(response.data);
 
-    // Create a link element and trigger the download
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', fileName);
-    document.body.appendChild(link);
-    link.click();
+      // Create a link element and trigger the download
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
 
-    // Clean up and remove the link element
-    document.body.removeChild(link);
+      // Clean up and remove the link element
+      document.body.removeChild(link);
 
-    // Revoke the object URL to free up memory
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Failed to download file', error);
-    alert('Failed to download file');
-  }
-};
+      // Revoke the object URL to free up memory
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download file', error);
+      alert('Failed to download file');
+    }
+  };
 
   return (
     <div>
-      <Navbar /> 
+      <Navbar />
       <form onSubmit={uploadFile}>
         <input type="file" onChange={handleFileChange} required />
 

@@ -20,9 +20,11 @@ from .views import (
 urlpatterns = [
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/user/', UserDetailView.as_view(), name='user_detail'),
+
     path('api/admin/dashboard/', AdminDashboardView.as_view(), name='admin_dashboard'),
     path('api/admin/create-user/', UserCreateView.as_view(), name='create_user'),
     path('api/admin/edit-user/<int:user_id>/', UserDetailView.as_view(), name='edit-user'),
+    path('api/profile/', UserDetailView.as_view(), name='user-detail'),
     path('api/admin/delete-user/<int:user_id>/', UserDeleteView.as_view(), name='delete_user'),
     path('api/classes/', ClassListView.as_view(), name='class_list'),
     path('api/teacher/dashboard/', TeacherDashboardView.as_view(), name='teacher_dashboard'),
