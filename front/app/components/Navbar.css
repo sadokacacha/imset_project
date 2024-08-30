@@ -1,6 +1,5 @@
 .sidebar {
-  width: 250px; /* Adjust the width as needed */
-  height: 100vh; /* Full height of the viewport */
+  width: 16rem; /* Adjust the width as needed */
   color: white; /* Text color */
   padding: 20px; /* Optional padding */
   top: 0;

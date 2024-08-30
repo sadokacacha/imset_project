@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import AuthContext, { AuthContextType } from '../context/AuthContext';
 import { useContext } from 'react';
-
+import './layout.css';
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -14,8 +14,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div>
       <header>
-        <nav>
-          <ul>
+        <nav className='navlink'>
+          <ul className='navlink'>
             {user ? (
               <>
                 {user.role === 'admin' && (
