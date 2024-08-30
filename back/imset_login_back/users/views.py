@@ -6,10 +6,10 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from django.contrib.auth import get_user_model
 from .serializers import CustomTokenObtainPairSerializer , UserSerializer  , UploadedFileSerializer , ClassNameSerializer
-from .models import UploadedFile , ClassName
+from .models import UploadedFile , ClassName , User
 from rest_framework.parsers import MultiPartParser, FormParser
-from django.http import HttpResponse, Http404
-from django.utils.encoding import smart_str
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, Http404 , FileResponse
 from django.db import IntegrityError
 from mimetypes import guess_type
 
@@ -264,6 +264,14 @@ class TeacherDeleteFileGroupView(APIView):
         files_to_delete.delete()
 
         return Response({'message': 'File group deleted successfully'}, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
 
 class StudentDashboardView(APIView):
     permission_classes = [IsAuthenticated]

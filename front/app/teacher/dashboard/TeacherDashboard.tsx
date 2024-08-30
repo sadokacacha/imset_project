@@ -235,7 +235,9 @@ const TeacherDashboard: React.FC = () => {
   };
 
   return (
+    
     <div>
+
       <Navbar />
       <form
         onSubmit={(e) => {
@@ -372,6 +374,7 @@ const TeacherDashboard: React.FC = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
     </div>
   );
 };
