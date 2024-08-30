@@ -152,6 +152,7 @@ class TeacherClassListView(APIView):
 
 from collections import defaultdict
 
+
 class TeacherUploadedFilesView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -170,12 +171,12 @@ class TeacherUploadedFilesView(APIView):
         response_data = []
         for group_name, file_list in grouped_files.items():
             response_data.append({
+                'id': group_name,
                 'name': group_name,
                 'files': UploadedFileSerializer(file_list, many=True).data
             })
 
         return Response(response_data, status=status.HTTP_200_OK)
-
 
 
 

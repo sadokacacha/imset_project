@@ -85,15 +85,15 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
         
 class UploadedFileSerializer(serializers.ModelSerializer):
-    classes = ClassNameSerializer(many=True)
-    teacher = serializers.SerializerMethodField()
+    file_name = serializers.SerializerMethodField()
+    file_extension = serializers.SerializerMethodField()
 
     class Meta:
         model = UploadedFile
-        fields = ['id', 'name', 'uploaded_at', 'classes', 'teacher']
+        fields = ['id', 'file', 'file_name', 'file_extension']
 
-    def get_teacher(self, obj):
-        return {
-            "first_name": obj.user.first_name,
-            "last_name": obj.user.last_name
-        }
+    def get_file_name(self, obj):
+        return obj.file.name.split('/')[-1]  # Extract the file name from the path
+
+    def get_file_extension(self, obj):
+        return obj.file.name.split('.')[-1] if '.' in obj.file.name else ''  # Extract the file extension

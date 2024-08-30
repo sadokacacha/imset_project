@@ -4,6 +4,12 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import Navbar from '../../components/Navbar';
 import { Modal, Button } from 'react-bootstrap';
+import {
+  FaFilePdf,
+  FaFileWord,
+  FaFileArchive,
+  FaFileAlt,
+} from 'react-icons/fa'; // Import icons
 
 interface Class {
   id: string;
@@ -12,7 +18,7 @@ interface Class {
 
 interface UploadedFile {
   id: string;
-  name: string;
+  file: string; 
   uploaded_at: string;
   classes: Class[];
 }
@@ -22,6 +28,22 @@ interface FileGroup {
   name: string;
   files: UploadedFile[];
 }
+
+const getIconForFileType = (filePath: string) => {
+  const extension = filePath.split('.').pop()?.toLowerCase();
+  switch (extension) {
+    case 'pdf':
+      return <FaFilePdf style={{ color: 'red' }} />;
+    case 'doc':
+    case 'docx':
+      return <FaFileWord style={{ color: 'blue' }} />;
+    case 'rar':
+    case 'zip':
+      return <FaFileArchive style={{ color: 'orange' }} />;
+    default:
+      return <FaFileAlt />;
+  }
+};
 
 const TeacherDashboard: React.FC = () => {
   const [classes, setClasses] = useState<Class[]>([]);
@@ -134,24 +156,22 @@ const TeacherDashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteGroup = async (groupId: string | undefined) => {
-    if (!groupId) {
-      console.error('Invalid groupId:', groupId);
+  const handleDeleteGroup = async (groupName: string | undefined) => {
+    if (!groupName) {
+      console.error('Invalid groupName:', groupName);
       alert('Invalid group selected for deletion');
       return;
     }
 
     const accessToken = Cookies.get('access_token');
-
     if (!accessToken) {
       alert('Access token not found. Please log in.');
       return;
     }
 
     try {
-      console.log('Deleting group with ID:', groupId);
       await axios.delete(
-        `http://localhost:8000/api/teacher/delete-file-group/${groupId}/`,
+        `http://localhost:8000/api/teacher/delete-file-group/${groupName}/`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -159,14 +179,12 @@ const TeacherDashboard: React.FC = () => {
         }
       );
 
-      // Refresh the list of uploaded files
-      fetchUploadedFiles();
+      fetchUploadedFiles(); // Refresh files
 
       alert('File group deleted successfully');
     } catch (error: any) {
       console.error('Failed to delete file group', error);
 
-      // Provide more detailed error feedback if available
       const errorMessage =
         error.response?.data?.error || 'Failed to delete file group';
       alert(errorMessage);
@@ -225,6 +243,7 @@ const TeacherDashboard: React.FC = () => {
           setShowConfirmation(true);
         }}
       >
+        {/* File Input and Class Selection Fields */}
         <input type="file" multiple onChange={handleFileChange} />
 
         <input
@@ -249,10 +268,11 @@ const TeacherDashboard: React.FC = () => {
           ))}
         </select>
 
+        {/* File List with Remove Button */}
         <ul>
           {files.map((file, index) => (
             <li key={index}>
-              {file.name}{' '}
+              {getIconForFileType(file.name)} {file.name}{' '}
               <button type="button" onClick={() => handleRemoveFile(index)}>
                 Remove
               </button>
@@ -265,16 +285,17 @@ const TeacherDashboard: React.FC = () => {
 
       <h2>Your Files</h2>
       <div>
-        {uploadedFiles.map((group) => (
+        {uploadedFiles.map((group, index) => (
           <div
-            key={group.id} // Ensure a unique key is present
+            key={index} // Ensure unique key
             style={{
               border: '1px solid #ccc',
               padding: '10px',
               margin: '10px 0',
-              position: 'relative', // Position for the delete button
+              position: 'relative',
               cursor: 'pointer',
             }}
+            onClick={() => openFileGroup(group)} // Set the group as currentGroup
           >
             <h3>{group.name}</h3>
             <p>{group.files.length} files</p>
@@ -286,14 +307,12 @@ const TeacherDashboard: React.FC = () => {
                 backgroundColor: 'red',
                 color: 'white',
                 border: 'none',
-                borderRadius: '50%',
-                width: '25px',
-                height: '25px',
+                padding: '5px 10px',
                 cursor: 'pointer',
               }}
               onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering the group click event
-                handleDeleteGroup(group.id); // Call delete handler
+                e.stopPropagation();
+                handleDeleteGroup(group.name);
               }}
             >
               X
@@ -302,20 +321,44 @@ const TeacherDashboard: React.FC = () => {
         ))}
       </div>
 
+      {/* Modal to Show Files of the Selected Group */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Files in {currentGroup?.name}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {currentGroup?.files.map((file, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
+              {getIconForFileType(file.file)} {/* Pass the correct field */}
+              <span style={{ marginLeft: '10px' }}>
+                {file.file.split('/').pop()} {/* Extract the file name */}
+              </span>
+              <button
+                style={{ marginLeft: 'auto' }}
+                onClick={() =>
+                  downloadFile(file.id, file.file.split('/').pop()!)
+                }
+              >
+                Download
+              </button>
+            </div>
+          ))}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {/* Confirmation Modal */}
       <Modal show={showConfirmation} onHide={() => setShowConfirmation(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Upload</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>You have selected the following files:</p>
-          <ul>
-            {files.map((file, index) => (
-              <li key={index}>{file.name}</li>
-            ))}
-          </ul>
-          <p>Group Name: {customName}</p>
-          <p>Classes: {selectedClasses.join(', ')}</p>
+          Are you sure you want to upload {files.length} files to the selected
+          classes?
         </Modal.Body>
         <Modal.Footer>
           <Button
@@ -325,39 +368,10 @@ const TeacherDashboard: React.FC = () => {
             Cancel
           </Button>
           <Button variant="primary" onClick={uploadFiles}>
-            Confirm and Upload
+            Confirm
           </Button>
         </Modal.Footer>
       </Modal>
-
-      {/* File Group Modal */}
-      {currentGroup && (
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>{currentGroup.name}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <ul>
-              {currentGroup.files.map((file) => (
-                <li key={file.id}>
-                  {file.name}{' '}
-                  <Button
-                    variant="primary"
-                    onClick={() => downloadFile(file.id, file.name)}
-                  >
-                    Download
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      )}
     </div>
   );
 };
