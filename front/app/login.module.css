@@ -2,8 +2,9 @@
 .container {
   display: flex;
   flex-direction: row;
-  height: 100vh;
   overflow: hidden;
+  height: 100vh; /* Définit la hauteur du conteneur à 100% de la hauteur de la fenêtre */
+  width: 100vw; /* Définit la largeur du conteneur à 100% de la largeur de la fenêtre */
   
 }
 
@@ -36,14 +37,13 @@
 }
 
 .formSection {
-  flex: 1;
+  flex: 2;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: #ffffff;
   padding: 20px;
-  position: relative;
 }
 
 .title {
@@ -52,9 +52,11 @@
   color: #000000;
   border-bottom: 3px solid #5b0e0e;
   padding-bottom: 1rem;
-  text-align: center;
-  width: 100%;
+  width: 3rem;
+  display: flex;
+  justify-content: center;
 }
+
 
 .form {
   width: 100%;
@@ -117,3 +119,5 @@
     width: 200px;
   }
 }
+
+

@@ -65,9 +65,9 @@ const HomePage: React.FC = () => {
           src="/images/download.png"
           alt="My Image"
           className={styles.absoluteImage} // Apply absolute positioning
-          width={500} // Original width of the image
+          width={500}  // Original width of the image
           height={300} // Original height of the image
-          style={{ width: "100%", height: "auto" }} // New style to maintain aspect ratio
+          layout="respansive" // Maintain original width and height
         />
 
         <h2 className={styles.title}>Login</h2>

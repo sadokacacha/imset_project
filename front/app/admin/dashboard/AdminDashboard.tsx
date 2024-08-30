@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-
+import "./Admin.css"
 import {
   useContext,
   useState,
@@ -336,10 +336,9 @@ const AdminDashboard: React.FC = () => {
 
   return (
     
-    <div className="flex h-screen">
+    <div className="screen">
       <Navbar />
-
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="righscreen">
         <button
           onClick={() => setIsModalOpen(true)}
           className="bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4"
