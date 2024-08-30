@@ -15,6 +15,7 @@ from .views import (
     StudentClassFilesView, 
     StudentFileDownloadView,
     UserDetailView,
+    TeacherDeleteFileGroupView,
 )
 
 urlpatterns = [
@@ -28,8 +29,12 @@ urlpatterns = [
     path('api/admin/delete-user/<int:user_id>/', UserDeleteView.as_view(), name='delete_user'),
     path('api/classes/', ClassListView.as_view(), name='class_list'),
     path('api/teacher/dashboard/', TeacherDashboardView.as_view(), name='teacher_dashboard'),
-    path('api/teacher/upload-file/', TeacherFileUploadView.as_view(), name='teacher_file_upload'),
-    path('api/teacher/uploaded-files/', TeacherUploadedFilesView.as_view(), name='teacher_uploaded_files'),  
+    
+    path('api/teacher/upload-file-group/', TeacherFileUploadView.as_view(), name='upload-file-group'),
+    path('api/teacher/uploaded-file-groups/', TeacherUploadedFilesView.as_view(), name='uploaded-file-groups'),
+    path('api/teacher/download-file/<int:file_id>/', TeacherFileDownloadView.as_view(), name='download-file'),
+    path('teacher/delete-file-group/<str:group_id>/', TeacherDeleteFileGroupView.as_view(), name='delete-file-group'),
+
     path('api/teacher/classes/', TeacherClassListView.as_view(), name='teacher_classes'),
     path('api/teacher/download-file/<int:file_id>/', TeacherFileDownloadView.as_view(), name='teacher_file_download'),
     path('api/student/class-files/', StudentClassFilesView.as_view(), name='student-class-files'),

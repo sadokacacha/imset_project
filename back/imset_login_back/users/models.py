@@ -53,8 +53,8 @@ class User(AbstractUser):
 class UploadedFile(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     file = models.FileField(upload_to='uploads/')
-    name = models.CharField(max_length=255, blank=True, null=True)  # Custom name field
-    classes = models.ManyToManyField(ClassName)  # Allow multiple classes
+    name = models.CharField(max_length=255, blank=True, null=True)
+    classes = models.ManyToManyField(ClassName)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

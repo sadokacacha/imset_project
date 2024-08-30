@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import Navbar from '../../components/Navbar';
+import { Modal, Button } from 'react-bootstrap';
 
 interface Class {
   id: string;
@@ -12,18 +13,25 @@ interface Class {
 interface UploadedFile {
   id: string;
   name: string;
-  fileType: string;
   uploaded_at: string;
   classes: Class[];
+}
+
+interface FileGroup {
+  id: string;
+  name: string;
+  files: UploadedFile[];
 }
 
 const TeacherDashboard: React.FC = () => {
   const [classes, setClasses] = useState<Class[]>([]);
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
-  const [file, setFile] = useState<File | null>(null);
-  const [fileType, setFileType] = useState<string>('');
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<FileGroup[]>([]);
   const [customName, setCustomName] = useState<string>('');
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [currentGroup, setCurrentGroup] = useState<FileGroup | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   useEffect(() => {
     fetchTeacherClasses();
@@ -50,8 +58,8 @@ const TeacherDashboard: React.FC = () => {
   const fetchUploadedFiles = async () => {
     const accessToken = Cookies.get('access_token');
     try {
-      const fileResponse = await axios.get<UploadedFile[]>(
-        'http://localhost:8000/api/teacher/uploaded-files/',
+      const fileResponse = await axios.get<FileGroup[]>(
+        'http://localhost:8000/api/teacher/uploaded-file-groups/',
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -66,12 +74,8 @@ const TeacherDashboard: React.FC = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      setFiles([...files, ...Array.from(e.target.files)]);
     }
-  };
-
-  const handleFileTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFileType(e.target.value);
   };
 
   const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -86,15 +90,22 @@ const TeacherDashboard: React.FC = () => {
     setCustomName(e.target.value);
   };
 
-  const uploadFile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file || selectedClasses.length === 0) return;
+  const handleRemoveFile = (index: number) => {
+    const updatedFiles = [...files];
+    updatedFiles.splice(index, 1);
+    setFiles(updatedFiles);
+  };
+
+  const uploadFiles = async () => {
+    if (files.length === 0 || selectedClasses.length === 0 || !customName)
+      return;
 
     const accessToken = Cookies.get('access_token');
     const formData = new FormData();
-    formData.append('file', file);
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
     formData.append('name', customName);
-    formData.append('file_type', fileType);
 
     selectedClasses.forEach((classId) => {
       formData.append('class_ids', classId);
@@ -102,7 +113,7 @@ const TeacherDashboard: React.FC = () => {
 
     try {
       await axios.post(
-        'http://localhost:8000/api/teacher/upload-file/',
+        'http://localhost:8000/api/teacher/upload-file-group/',
         formData,
         {
           headers: {
@@ -111,12 +122,60 @@ const TeacherDashboard: React.FC = () => {
           },
         }
       );
-      alert('File uploaded successfully');
+      alert('Files uploaded successfully');
+      setFiles([]); // Clear the files after upload
+      setCustomName(''); // Clear the custom name
       fetchUploadedFiles();
     } catch (error) {
-      console.error('Failed to upload file', error);
-      alert('Failed to upload file');
+      console.error('Failed to upload files', error);
+      alert('Failed to upload files');
+    } finally {
+      setShowConfirmation(false); // Hide confirmation modal after upload
     }
+  };
+
+  const handleDeleteGroup = async (groupId: string | undefined) => {
+    if (!groupId) {
+      console.error('Invalid groupId:', groupId);
+      alert('Invalid group selected for deletion');
+      return;
+    }
+
+    const accessToken = Cookies.get('access_token');
+
+    if (!accessToken) {
+      alert('Access token not found. Please log in.');
+      return;
+    }
+
+    try {
+      console.log('Deleting group with ID:', groupId);
+      await axios.delete(
+        `http://localhost:8000/api/teacher/delete-file-group/${groupId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      // Refresh the list of uploaded files
+      fetchUploadedFiles();
+
+      alert('File group deleted successfully');
+    } catch (error: any) {
+      console.error('Failed to delete file group', error);
+
+      // Provide more detailed error feedback if available
+      const errorMessage =
+        error.response?.data?.error || 'Failed to delete file group';
+      alert(errorMessage);
+    }
+  };
+
+  const openFileGroup = (group: FileGroup) => {
+    setCurrentGroup(group);
+    setShowModal(true);
   };
 
   const downloadFile = async (
@@ -137,24 +196,19 @@ const TeacherDashboard: React.FC = () => {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-          responseType: 'blob', // Important for downloading files
+          responseType: 'blob',
         }
       );
 
-      // Create a URL for the file blob
       const url = window.URL.createObjectURL(response.data);
 
-      // Create a link element and trigger the download
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
 
-      // Clean up and remove the link element
       document.body.removeChild(link);
-
-      // Revoke the object URL to free up memory
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Failed to download file', error);
@@ -165,23 +219,21 @@ const TeacherDashboard: React.FC = () => {
   return (
     <div>
       <Navbar />
-      <form onSubmit={uploadFile}>
-        <input type="file" onChange={handleFileChange} required />
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setShowConfirmation(true);
+        }}
+      >
+        <input type="file" multiple onChange={handleFileChange} />
 
         <input
           type="text"
-          placeholder="Custom File Name"
+          placeholder="Custom Group Name"
           value={customName}
           onChange={handleCustomNameChange}
           required
         />
-
-        <select value={fileType} onChange={handleFileTypeChange} required>
-          <option value="">Select File Type</option>
-          <option value="pdf">PDF</option>
-          <option value="ppt">PowerPoint</option>
-          <option value="doc">Word Document</option>
-        </select>
 
         <select
           multiple
@@ -197,33 +249,115 @@ const TeacherDashboard: React.FC = () => {
           ))}
         </select>
 
-        <button type="submit">Upload File</button>
+        <ul>
+          {files.map((file, index) => (
+            <li key={index}>
+              {file.name}{' '}
+              <button type="button" onClick={() => handleRemoveFile(index)}>
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <button type="submit">Confirm Upload</button>
       </form>
 
-      <h2>Uploaded Files</h2>
-      <ul>
-        {uploadedFiles.map((file) => (
-          <li key={file.id}>
-            <span
+      <h2>Your Files</h2>
+      <div>
+        {uploadedFiles.map((group) => (
+          <div
+            key={group.id} // Ensure a unique key is present
+            style={{
+              border: '1px solid #ccc',
+              padding: '10px',
+              margin: '10px 0',
+              position: 'relative', // Position for the delete button
+              cursor: 'pointer',
+            }}
+          >
+            <h3>{group.name}</h3>
+            <p>{group.files.length} files</p>
+            <button
               style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                backgroundColor: 'red',
+                color: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: '25px',
+                height: '25px',
                 cursor: 'pointer',
-                color: 'blue',
-                textDecoration: 'underline',
               }}
-              onClick={() =>
-                downloadFile(file.id, file.name || 'downloaded-file')
-              }
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the group click event
+                handleDeleteGroup(group.id); // Call delete handler
+              }}
             >
-              {file.name} ({file.fileType})
-            </span>{' '}
-            - Uploaded on {new Date(file.uploaded_at).toLocaleDateString()} to
-            classes:{' '}
-            {file.classes.length > 0
-              ? file.classes.map((cls) => cls.name).join(', ')
-              : 'No classes'}
-          </li>
+              X
+            </button>
+          </div>
         ))}
-      </ul>
+      </div>
+
+      {/* Confirmation Modal */}
+      <Modal show={showConfirmation} onHide={() => setShowConfirmation(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Upload</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>You have selected the following files:</p>
+          <ul>
+            {files.map((file, index) => (
+              <li key={index}>{file.name}</li>
+            ))}
+          </ul>
+          <p>Group Name: {customName}</p>
+          <p>Classes: {selectedClasses.join(', ')}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmation(false)}
+          >
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={uploadFiles}>
+            Confirm and Upload
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* File Group Modal */}
+      {currentGroup && (
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>{currentGroup.name}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <ul>
+              {currentGroup.files.map((file) => (
+                <li key={file.id}>
+                  {file.name}{' '}
+                  <Button
+                    variant="primary"
+                    onClick={() => downloadFile(file.id, file.name)}
+                  >
+                    Download
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
     </div>
   );
 };

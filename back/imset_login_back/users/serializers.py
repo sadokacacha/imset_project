@@ -85,16 +85,12 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
         
 class UploadedFileSerializer(serializers.ModelSerializer):
-    fileType = serializers.SerializerMethodField()
     classes = ClassNameSerializer(many=True)
     teacher = serializers.SerializerMethodField()
 
     class Meta:
         model = UploadedFile
-        fields = ['id', 'name', 'fileType', 'uploaded_at', 'classes', 'teacher']
-
-    def get_fileType(self, obj):
-        return obj.file.name.split('.')[-1]
+        fields = ['id', 'name', 'uploaded_at', 'classes', 'teacher']
 
     def get_teacher(self, obj):
         return {

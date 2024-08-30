@@ -150,43 +150,7 @@ class TeacherClassListView(APIView):
         return Response(serializer.data)
 
 
-class TeacherFileUploadView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        if request.user.role != 'teacher':
-            return Response({'error': 'You do not have permission to access this resource.'}, status=403)
-        
-        file = request.FILES.get('file')
-        custom_name = request.data.get('name')
-        class_ids = request.data.getlist('class_ids')  # Retrieve multiple class IDs
-
-        if not file:
-            return Response({'error': 'No file provided'}, status=400)
-
-        if not class_ids:
-            return Response({'error': 'No classes selected'}, status=400)
-
-        uploaded_file = UploadedFile(
-            user=request.user, 
-            file=file,
-            name=custom_name if custom_name else file.name  # Use custom name if provided
-        )
-        uploaded_file.save()
-
-        # Assign the file to the selected classes
-        for class_id in class_ids:
-            try:
-                class_instance = ClassName.objects.get(id=class_id, teachers=request.user)
-                uploaded_file.classes.add(class_instance)
-            except ClassName.DoesNotExist:
-                return Response({'error': f'Invalid class with ID {class_id} or you do not have access to this class'}, status=400)
-
-        uploaded_file.save()
-        return Response({'message': 'File uploaded successfully'}, status=status.HTTP_201_CREATED)
-
-
-
+from collections import defaultdict
 
 class TeacherUploadedFilesView(APIView):
     permission_classes = [IsAuthenticated]
@@ -196,8 +160,66 @@ class TeacherUploadedFilesView(APIView):
             return Response({'error': 'You do not have permission to access this resource.'}, status=403)
 
         files = UploadedFile.objects.filter(user=request.user).prefetch_related('classes')
-        serializer = UploadedFileSerializer(files, many=True)
-        return Response(serializer.data)
+
+        # Group files by their custom name
+        grouped_files = defaultdict(list)
+        for file in files:
+            group_name = file.name or "Unnamed Group"
+            grouped_files[group_name].append(file)
+
+        response_data = []
+        for group_name, file_list in grouped_files.items():
+            response_data.append({
+                'name': group_name,
+                'files': UploadedFileSerializer(file_list, many=True).data
+            })
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+
+
+
+
+class TeacherFileUploadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        if request.user.role != 'teacher':
+            return Response({'error': 'You do not have permission to access this resource.'}, status=403)
+
+        files = request.FILES.getlist('files')
+        custom_name = request.data.get('name')
+        class_ids = request.data.getlist('class_ids')
+
+        if not files:
+            return Response({'error': 'No files provided'}, status=400)
+
+        if not class_ids:
+            return Response({'error': 'No classes selected'}, status=400)
+
+        for file in files:
+            uploaded_file = UploadedFile(
+                user=request.user,
+                file=file,
+                name=custom_name if custom_name else file.name  # Use custom name if provided
+            )
+            uploaded_file.save()
+
+            for class_id in class_ids:
+                try:
+                    class_instance = ClassName.objects.get(id=class_id, teachers=request.user)
+                    uploaded_file.classes.add(class_instance)
+                except ClassName.DoesNotExist:
+                    return Response({'error': f'Invalid class with ID {class_id} or you do not have access to this class'}, status=400)
+
+            uploaded_file.save()
+
+        return Response({'message': 'Files uploaded successfully'}, status=status.HTTP_201_CREATED)
+
+
+
+
 
 
 class TeacherFileDownloadView(APIView):
@@ -224,8 +246,23 @@ class TeacherFileDownloadView(APIView):
         except UploadedFile.DoesNotExist:
             return Response({'error': 'File not found'}, status=404)
 
+class TeacherDeleteFileGroupView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def delete(self, request, group_id, *args, **kwargs):
+        if request.user.role != 'teacher':
+            return Response({'error': 'You do not have permission to access this resource.'}, status=403)
 
+        # Find all files in the group by the group name (assuming group_id is the group's name)
+        files_to_delete = UploadedFile.objects.filter(user=request.user, name=group_id)
+
+        if not files_to_delete.exists():
+            return Response({'error': 'File group not found'}, status=404)
+
+        # Delete all files in the group
+        files_to_delete.delete()
+
+        return Response({'message': 'File group deleted successfully'}, status=status.HTTP_200_OK)
 
 class StudentDashboardView(APIView):
     permission_classes = [IsAuthenticated]
