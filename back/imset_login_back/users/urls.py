@@ -15,6 +15,9 @@ from .views import (
 
     UserDetailView,
     TeacherDeleteFileGroupView,
+
+    StudentUploadedFilesView,
+    StudentFileDownloadView,
 )
 
 urlpatterns = [
@@ -38,6 +41,10 @@ urlpatterns = [
     path('api/teacher/delete-file-group/<str:group_id>/', TeacherDeleteFileGroupView.as_view(), name='delete-file-group'),
     path('api/teacher/classes/', TeacherClassListView.as_view(), name='teacher_classes'),
     path('api/teacher/download-file/<int:file_id>/', TeacherFileDownloadView.as_view(), name='teacher_file_download'),
+
+    path('api/student/uploaded-file-groups/', StudentUploadedFilesView.as_view(), name='student-uploaded-file-groups'),
+    path('api/student/download-file/<int:file_id>/', StudentFileDownloadView.as_view(), name='student-download-file'),
+
 
  
     path('api/users/<int:user_id>/', UserDetailView.as_view(), name='user-detail'),  # For specific user
