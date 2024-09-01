@@ -153,7 +153,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     Cookies.remove('access_token');
     Cookies.remove('refresh_token');
     setUser(null);
-    router.push('/login');
+    router.push('/');
   };
 
   return (
