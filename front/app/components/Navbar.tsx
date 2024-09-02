@@ -22,31 +22,45 @@ const Navbar: React.FC = () => {
           {user?.role === 'admin' && (
             <>
               <li>
-                <Link className="link" href="/admin/AdminUserTab">
-                  Manage Users
+                <Link className="link" href="/admin/dashboard">
+                  Home
                 </Link>
               </li>
 
               <li>
-                <Link className="link" href="/admin/dashboard">
-                  view resume
+                <Link className="link" href="">
+                  Manage Users
                 </Link>
               </li>
             </>
           )}
 
           {user?.role === 'teacher' && (
-            <li>
-              <Link className="link" href="">
-                add files
-              </Link>
-            </li>
+            <>
+              <li>
+                <Link className="link" href="/teacher/dashboard">
+                  HOME
+                </Link>
+              </li>
+
+              <li>
+                <Link className="link" href="/teacher/dashboard/AddFiles">
+                  add files
+                </Link>
+              </li>
+            </>
           )}
 
           {user?.role === 'student' && (
             <>
               <li>
-                <Link className="link" href="/Speakpdf">
+                <Link className="link" href="/student/dashboard">
+                  HOME
+                </Link>
+              </li>
+    
+              <li>
+                <Link className="link" href="/student/dashboard/ViewResume">
                   Resume
                 </Link>
               </li>

@@ -6,10 +6,10 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from django.contrib.auth import get_user_model
 from .serializers import CustomTokenObtainPairSerializer , UserSerializer  , UploadedFileSerializer , ClassNameSerializer
-from .models import UploadedFile , ClassName
+from .models import UploadedFile , ClassName , User
 from rest_framework.parsers import MultiPartParser, FormParser
-from django.http import HttpResponse, Http404
-from django.utils.encoding import smart_str
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, Http404 , FileResponse
 from django.db import IntegrityError
 from mimetypes import guess_type
 
@@ -247,6 +247,7 @@ class TeacherFileDownloadView(APIView):
         except UploadedFile.DoesNotExist:
             return Response({'error': 'File not found'}, status=404)
 
+
 class TeacherDeleteFileGroupView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -264,6 +265,14 @@ class TeacherDeleteFileGroupView(APIView):
         files_to_delete.delete()
 
         return Response({'message': 'File group deleted successfully'}, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
 
 class StudentDashboardView(APIView):
     permission_classes = [IsAuthenticated]
@@ -295,6 +304,34 @@ class StudentClassFilesView(APIView):
         files = UploadedFile.objects.filter(classes=student_class)
         serializer = UploadedFileSerializer(files, many=True)
         return Response(serializer.data)
+    
+class StudentUploadedFilesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.role != 'student':
+            return Response({'error': 'You do not have permission to access this resource.'}, status=403)
+
+        student_class = request.user.class_name  # Assuming each student has a `class_name` field that links to a ClassName model
+        if not student_class:
+            return Response({'error': 'You are not assigned to any class.'}, status=400)
+
+        files = UploadedFile.objects.filter(classes=student_class).distinct()
+
+        grouped_files = defaultdict(list)
+        for file in files:
+            group_name = file.name or "Unnamed Group"
+            grouped_files[group_name].append(file)
+
+        response_data = []
+        for group_name, file_list in grouped_files.items():
+            response_data.append({
+                'id': group_name,
+                'name': group_name,
+                'files': UploadedFileSerializer(file_list, many=True).data
+            })
+
+        return Response(response_data, status=status.HTTP_200_OK)
     
 class StudentFileDownloadView(APIView):
     permission_classes = [IsAuthenticated]
