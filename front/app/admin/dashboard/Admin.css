@@ -1,9 +1,0 @@
-.screen{
-display:flex;
-height: 100vh; /* Définit la hauteur du conteneur à 100% de la hauteur de la fenêtre */
-width: 100vw; /* Définit la largeur du conteneur à 100% de la largeur de la fenêtre */
-}
-
-.righscreen{
-    flex: auto;
-}

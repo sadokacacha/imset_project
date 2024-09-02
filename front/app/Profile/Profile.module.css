@@ -1,0 +1,176 @@
+/* Overall container */
+.container {
+    display: flex;
+    height: 100vh;
+    background-color: #f0f2f5;
+  }
+  
+  /* Navbar styling */
+  .navbar {
+    width: 250px;
+    background-color: #343a40;
+    color: #fff;
+    position: fixed;
+    height: 100%;
+    padding: 20px;
+  }
+  
+  /* Content area */
+  .content {
+    margin-left: 250px;
+    padding: 40px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  /* Profile card styling */
+  .profileCard {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  /* Profile header with picture and name */
+  .profileHeader {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .profilePicture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #007bff;
+    margin-right: 20px;
+  }
+  
+  .profileDetails {
+    text-align: left;
+  }
+  
+  .profileName {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .profileRole {
+    color: #777;
+    font-size: 1rem;
+  }
+  
+  /* Profile information */
+  .profileInfo {
+    text-align: left;
+    margin-top: 20px;
+    color: #555;
+  }
+  
+  .profileInfo p {
+    margin: 10px 0;
+  }
+  
+  /* School profile section */
+  .schoolProfile {
+    margin-top: 30px;
+    text-align: center;
+  }
+  
+  .schoolLogo {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border-radius: 10px;
+  }
+  
+  .schoolName {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .schoolDescription {
+    color: #666;
+    margin: 15px 0;
+  }
+  
+  .educationLevels {
+    list-style-type: none;
+    padding: 0;
+    margin: 15px 0;
+    color: #555;
+  }
+  
+  .educationLevels li {
+    margin-bottom: 5px;
+  }
+  
+  .learnMoreBtn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .learnMoreBtn:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Responsive styling */
+  @media (max-width: 1024px) {
+    .container {
+      flex-direction: column;
+    }
+  
+    .navbar {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+  
+    .content {
+      margin-left: 0;
+      padding: 20px;
+    }
+  
+    .profileCard {
+      width: 100%;
+    }
+  
+    .profileHeader {
+      flex-direction: column;
+    }
+  
+    .profilePicture {
+      margin-bottom: 15px;
+    }
+  
+    .profileDetails {
+      text-align: center;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .profileCard {
+      padding: 20px;
+    }
+  
+    .profileName {
+      font-size: 1.2rem;
+    }
+  
+    .schoolName {
+      font-size: 1.1rem;
+    }
+  }
+  

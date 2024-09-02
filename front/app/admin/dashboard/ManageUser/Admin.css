@@ -1,0 +1,177 @@
+/* General Styles */
+.screen {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    margin-left: 250px; /* Assuming sidebar width is 250px */
+    background-color: #f8f9fa; /* Light background color */
+    height: 100vh; /* Full viewport height */
+    overflow: auto; /* Scroll if content overflows */
+  }
+  
+  .righscreen {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  button {
+    background-color:#3c0000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #3c0000;
+  }
+  
+  button:disabled {
+    background-color: #d6d6d6; /* Disabled button color */
+    cursor: not-allowed;
+  }
+  
+  /* Navbar Styles */
+  .navbar {
+    /* Assuming you have some styles for Navbar */
+  }
+  
+  /* Tab Buttons */
+  button.active-tab {
+    font-weight: bold;
+    color:#3c0000;
+  }
+  
+  /* Input and Select Styles */
+  input[type="text"],
+  input[type="email"],
+  input[type="date"],
+  input[type="tel"],
+  select {
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    width: 100%;
+  }
+  
+  select[multiple] {
+    height: 150px; /* Adjust height for multiple select */
+  }
+  
+  /* Table Styles */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  th,
+  td {
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #e9ecef;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  /* Modal Styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 500px; /* Adjust modal width as needed */
+  }
+  
+  .modal-header,
+  .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-header {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+  }
+  
+  .modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding-top: 10px;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 1200px) {
+    .screen {
+      margin-left: 200px; /* Adjust margin for smaller screens */
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .screen {
+      margin-left: 150px; /* Adjust margin further */
+    }
+  
+    .righscreen {
+      padding: 10px;
+    }
+  
+    button {
+      padding: 8px 16px; /* Smaller padding for buttons */
+    }
+  
+    table th, table td {
+      padding: 8px; /* Smaller padding in table cells */
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .screen {
+      margin-left: 0; /* No margin for very small screens */
+    }
+  
+    .righscreen {
+      padding: 5px;
+    }
+  
+    button {
+      padding: 6px 12px; /* Even smaller padding for buttons */
+    }
+  
+    table {
+      font-size: 14px; /* Smaller font size in tables */
+    }
+  
+    .modal-content {
+      width: 90%; /* Full width with margin for modals */
+      margin: 10px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .modal-content {
+      width: 100%; /* Full width for very small screens */
+      margin: 0;
+    }
+  }
+  
