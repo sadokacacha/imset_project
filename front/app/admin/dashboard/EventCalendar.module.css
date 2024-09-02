@@ -137,7 +137,7 @@ display: flex;
   padding: 1rem;
   flex: 1;
     background-color: #ffffff; /* Background color for the Navbar */
- 
+ color: black;
 }
 
 /* UserCard styling */
