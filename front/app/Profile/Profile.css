@@ -1,0 +1,10 @@
+.profilepicture{
+    width: 50%;
+    height: 100%;
+}
+
+.allpage{
+display: flex;
+height: 100vh;
+width: 100vw;
+}

@@ -3,6 +3,8 @@ import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import AuthContext, { AuthContextType } from '../context/AuthContext';
+import Navbar from '../components/Navbar';
+import "./Profile.css"
 
 type UserProfile = {
   first_name: string;
@@ -39,15 +41,14 @@ const Profile: React.FC = () => {
 
     fetchProfile(); // Call the fetchProfile function
   }, []);
-
   if (!profile) {
     return <div>Loading...</div>;
   }
-
   return (
-    <div>
+    <div className='allpage'>
+      <Navbar/>
+      <div className="profilepicture">
       <h1>Profile</h1>
-      <div className="profile-picture">
         {profile.picture && (
           <img
             src={profile.picture}
@@ -84,7 +85,6 @@ const Profile: React.FC = () => {
           <strong>Role:</strong> {profile.role}
         </p>
       </div>
-      <button onClick={logout}>Log out</button>
     </div>
   );
 };

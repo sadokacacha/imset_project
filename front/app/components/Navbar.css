@@ -5,13 +5,6 @@
   top: 0;
   background-color: #3c0000;
   left: 0;
-    /* width: 250px;
-
-    color: white;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;    */
 }
 
 .link {
@@ -20,18 +13,26 @@
   font-weight: bold;
 }
 
-.link_login{
+.linklogin{
   color: #e8e8e8;
   font-weight: bold;
   border: none;
   background: none;
 }
 
+.linklogin:hover{
+  color: #e8e8e8;
+  font-weight: bold;
+  border: none;
+  background: none;
+  /* padding-right: 1px; */
+  padding:1% ;
+}
 
 .link:hover {
   text-decoration: underline;
   text-decoration: none;
-  padding: 1%;
+  padding: 1px;
 }
 
 .logo img {

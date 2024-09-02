@@ -65,7 +65,7 @@ const Navbar: React.FC = () => {
             </>
           )}
 
-          <button className="link_login" onClick={logout}>
+          <button className="linklogin" onClick={logout}>
             Log out
           </button>
         </ul>
