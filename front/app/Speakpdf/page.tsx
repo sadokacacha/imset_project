@@ -3,6 +3,7 @@ import { useState, FormEvent, ChangeEvent } from "react";
 import styles from "./Dashboard.module.css";
 import axios, { AxiosError } from "axios";
 import Navbar from "../components/Navbar";
+// import "./Navbar.css";
 
 interface ChatLogEntry {
   question: string;
@@ -57,8 +58,6 @@ const handleSubmit = async (e: FormEvent) => {
       { question: userInput, context },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    
-
     setResponse(res.data.response);
     setContext(res.data.context);
     setChatLog((prevChatLog) => [
@@ -98,17 +97,16 @@ const handleSubmit = async (e: FormEvent) => {
   };
 
   return (
-    <div className={styles.dashboard}>
+    <div className={styles.container1}>
       <Navbar />
-
-      <main className={styles.main}>
-        <header className={styles.header}>
-          <h2>Hello, Mr Ladhari</h2>
+      <main className={styles.content2}>
+        <header className={styles.profileCard}>
+          <h2>Hello,Im Mr Ladhari</h2>
           <p>Have a nice day</p>
         </header>
-        <div className={styles.chatbotContainer}>
+        <div className={styles.profileCard2}>
           <button className={styles.toggleButton} onClick={toggleChatbot}>
-            {isChatbotOpen ? "Close Chatbot" : "Open Chatbot"}
+            {isChatbotOpen ? "Close Chat" : "Open Chat"}
           </button>
           {isChatbotOpen && (
             <div className={styles.chatbot}>
@@ -131,9 +129,9 @@ const handleSubmit = async (e: FormEvent) => {
                   value={userInput}
                   onChange={handleInputChange}
                   placeholder="Type your question"
-                  required
+                  required                  
                 />
-                <button className={styles.envoyer} type="submit">
+                 <button className={styles.envoyer} type="submit">
                   Send
                 </button>
               </form>

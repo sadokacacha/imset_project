@@ -289,28 +289,11 @@ const TeacherDashboard: React.FC = () => {
         {uploadedFiles.map((group, index) => (
           <div
             key={index} // Ensure unique key
-            style={{
-              border: '1px solid #ccc',
-              padding: '10px',
-              margin: '10px 0',
-              position: 'relative',
-              cursor: 'pointer',
-            }}
             onClick={() => openFileGroup(group)} // Set the group as currentGroup
           >
             <h3>{group.name}</h3>
             <p>{group.files.length} files</p>
             <button
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                backgroundColor: 'red',
-                color: 'white',
-                border: 'none',
-                padding: '5px 10px',
-                cursor: 'pointer',
-              }}
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteGroup(group.name);
@@ -334,7 +317,6 @@ const TeacherDashboard: React.FC = () => {
                 {getIconForFileType(file.file)} {file.file}
                 <button
                   onClick={() => downloadFile(file.id, file.file)}
-                  style={{ marginLeft: '10px' }}
                 >
                   Download
                 </button>

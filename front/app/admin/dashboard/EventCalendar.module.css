@@ -8,7 +8,7 @@
 /* Sidebar styling */
 .sidebar {
   width: 250px; /* Default width for sidebar */
-  background-color: #f4f4f4; /* Sidebar background */
+  background-color: #f4f4f400; /* Sidebar background */
   padding: 1rem;
   /* Add any additional sidebar styles here */
 }
@@ -204,5 +204,8 @@ display: flex;
 
   .calendarContainer {
     align-items: center; /* Center content on small screens */
+  }
+  .icon{
+    display: none;
   }
 }
