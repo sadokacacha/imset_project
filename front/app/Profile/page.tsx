@@ -1,10 +1,11 @@
 'use client';
+
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import AuthContext, { AuthContextType } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
-import "./Profile.css"
+import styles from './Profile.module.css';
 
 type UserProfile = {
   first_name: string;
@@ -19,7 +20,7 @@ type UserProfile = {
 
 const Profile: React.FC = () => {
   const { logout } = useContext(AuthContext) as AuthContextType;
-  const [profile, setProfile] = useState<UserProfile | null>(null); // Set default empty state
+  const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -39,51 +40,56 @@ const Profile: React.FC = () => {
       }
     };
 
-    fetchProfile(); // Call the fetchProfile function
+    fetchProfile();
   }, []);
+
   if (!profile) {
     return <div>Loading...</div>;
   }
+
   return (
-    <div className='allpage'>
-      <Navbar/>
-      <div className="profilepicture">
-      <h1>Profile</h1>
-        {profile.picture && (
-          <img
-            src={profile.picture}
-            alt={`${profile.first_name} ${profile.last_name}`}
-          />
-        )}
-      </div>
-      <div className="profile-details">
-        <p>
-          <strong>First Name:</strong> {profile.first_name}
-        </p>
-        <p>
-          <strong>Last Name:</strong> {profile.last_name}
-        </p>
-        <p>
-          <strong>Email:</strong> {profile.email}
-        </p>
-        {profile.date_of_birth && (
-          <p>
-            <strong>Date of Birth:</strong> {profile.date_of_birth}
-          </p>
-        )}
-        {profile.id_card_or_passport && (
-          <p>
-            <strong>ID/Passport:</strong> {profile.id_card_or_passport}
-          </p>
-        )}
-        {profile.phone && (
-          <p>
-            <strong>Phone:</strong> {profile.phone}
-          </p>
-        )}
-        <p>
-          <strong>Role:</strong> {profile.role}
-        </p>
+    <div className={styles.container}>
+      <Navbar /> 
+      <div className={styles.content}>
+        <div className={styles.profileCard}>
+          <h1>Profile</h1>
+          {profile.picture && (
+            <img
+              src={`http://localhost:8000${profile.picture}`} 
+              alt={`${profile.first_name} ${profile.last_name}`}
+              className={styles.profilePicture}
+            />
+          )}
+          <div>
+            <p>
+              <strong>First Name:</strong> {profile.first_name}
+            </p>
+            <p>
+              <strong>Last Name:</strong> {profile.last_name}
+            </p>
+            <p>
+              <strong>Email:</strong> {profile.email}
+            </p>
+            {profile.date_of_birth && (
+              <p>
+                <strong>Date of Birth:</strong> {profile.date_of_birth}
+              </p>
+            )}
+            {profile.id_card_or_passport && (
+              <p>
+                <strong>ID/Passport:</strong> {profile.id_card_or_passport}
+              </p>
+            )}
+            {profile.phone && (
+              <p>
+                <strong>Phone:</strong> {profile.phone}
+              </p>
+            )}
+            <p>
+              <strong>Role:</strong> {profile.role}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
-import { User } from '../../context/AuthContext';
+import { User } from '../../../context/AuthContext';
 
 interface UserModalProps {
   show: boolean;

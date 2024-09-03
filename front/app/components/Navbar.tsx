@@ -22,13 +22,13 @@ const Navbar: React.FC = () => {
           {user?.role === 'admin' && (
             <>
               <li>
-                <Link className="link" href="/admin/dashboard">
+                <Link className="link" href="/admin/dashboard/">
                   Home
                 </Link>
               </li>
 
               <li>
-                <Link className="link" href="">
+                <Link className="link" href="/admin/dashboard/ManageUser">
                   Manage Users
                 </Link>
               </li>

@@ -41,14 +41,26 @@ class ClassNameSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     picture = serializers.ImageField(required=False)
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'role', 'first_name', 'last_name', 'picture']
-
+        fields = [
+            'id',
+            'email',
+            'role',
+            'first_name',
+            'last_name',
+            'picture',
+            'password',          # Include password in the fields
+            'classes_name',
+            'class_name'
+        ]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        if instance.picture:
+            data['picture'] = instance.picture.url  
         if instance.role == 'teacher':
             data['classes_name'] = [cls.name for cls in instance.classes_name.all()]
         elif instance.role == 'student':
@@ -56,11 +68,16 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        password = validated_data.pop('password', None)  # Extract password
         classes_name = validated_data.pop('classes_name', [])
         class_name = validated_data.pop('class_name', None)
         picture = validated_data.pop('picture', None)
 
-        user = User.objects.create_user(**validated_data)
+        user = User.objects.create_user(**validated_data)  # This handles password if provided
+
+        if password:
+            user.set_password(password)  # Explicitly set password if provided
+            user.save()
 
         if picture:
             user.picture = picture
@@ -70,20 +87,32 @@ class UserSerializer(serializers.ModelSerializer):
             user.classes_name.set(classes_name)
         elif user.role == 'student' and class_name:
             user.class_name = class_name
-        user.save()
+            user.save()
 
         return user
-    
+
     def update(self, instance, validated_data):
-        # Handle updating fields normally
+        password = validated_data.pop('password', None)  # Handle password update
+        classes_name = validated_data.pop('classes_name', None)
+        class_name = validated_data.pop('class_name', None)
+        picture = validated_data.pop('picture', None)
+
         for attr, value in validated_data.items():
-            if attr == 'picture' and value:
-                instance.picture = value
-            else:
-                setattr(instance, attr, value)
+            setattr(instance, attr, value)
+
+        if password:
+            instance.set_password(password)
+
+        if picture:
+            instance.picture = picture
+
+        if instance.role == 'teacher' and classes_name is not None:
+            instance.classes_name.set(classes_name)
+        elif instance.role == 'student' and class_name is not None:
+            instance.class_name = class_name
+
         instance.save()
         return instance
-        
 class UploadedFileSerializer(serializers.ModelSerializer):
     file_name = serializers.SerializerMethodField()
     file_extension = serializers.SerializerMethodField()

@@ -1,0 +1,208 @@
+/* Container for the Navbar and content */
+.containerWithSidebar {
+  display: flex;
+  min-height: 100vh; /* Full viewport height */
+  overflow: hidden; /* Prevent horizontal scroll */
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 250px; /* Default width for sidebar */
+  background-color: #f4f4f4; /* Sidebar background */
+  padding: 1rem;
+  /* Add any additional sidebar styles here */
+}
+
+
+.header{
+display: flex;
+
+}
+/* Main content area */
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem; /* Add padding around content */
+}
+
+/* Navbar styling */
+.navbar2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: #ffffff; /* Background color for the Navbar */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow for separation */
+  border-bottom: 1px solid #e5e7eb; /* Border below navbar */
+}
+
+/* Search bar styles */
+.searchBar {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem; /* text-xs */
+  border-radius: 9999px; /* rounded-full */
+  border: 1.5px solid #d1d5db; /* ring-gray-300 */
+  padding: 0 0.5rem;
+}
+
+.searchBar input {
+  width: 200px;
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+/* Show search bar on medium screens and larger */
+@media (min-width: 768px) {
+  .searchBar {
+    display: flex;
+  }
+}
+
+/* Icons and user section */
+.iconsUser {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+/* Icon styling */
+.icon {
+  background-color: white;
+  border-radius: 9999px;
+  width: 1.75rem; /* 28px */
+  height: 1.75rem; /* 28px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.icon img {
+  width: 1.25rem; /* 20px */
+  height: 1.25rem; /* 20px */
+}
+
+/* Notification badge */
+.notificationBadge {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  background-color: red;
+  color: rgb(0, 0, 0);
+  border-radius: 9999px;
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem; /* text-[10px] */
+}
+
+/* User info section */
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-size: 0.75rem; /* text-xs */
+  line-height: 1.125rem; /* leading-3 */
+  font-weight: 500; /* font-medium */
+}
+
+.userRole {
+  font-size: 0.625rem; /* text-[10px] */
+  color: #6b7280; /* text-gray-500 */
+  text-align: right;
+}
+
+/* Avatar styling */
+.avatar {
+  border-radius: 9999px; /* rounded-full */
+}
+
+/* Calendar and UserCard container */
+.calendarContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Align content to the right */
+  padding: 1rem;
+  flex: 1;
+    background-color: #ffffff; /* Background color for the Navbar */
+ color: black;
+}
+
+/* UserCard styling */
+.userCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+
+  width: 50%; /* Ensure UserCard takes full width in container */
+}
+
+.userCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.smallTag {
+  font-size: 0.625rem; /* text-[10px] */
+  background-color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  color: #4ade80; /* text-green-600 */
+}
+
+.userCardTitle {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 600; /* font-semibold */
+  margin: 1rem 0;
+}
+
+.userCardSubtitle {
+  font-size: 0.75rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: #6b7280; /* text-gray-500 */
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 200px; /* Adjust sidebar width for tablets */
+  }
+
+  .searchBar input {
+    width: 150px; /* Adjust width for smaller screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .containerWithSidebar {
+    flex-direction: column; /* Stack sidebar and content on small screens */
+  }
+
+  .sidebar {
+    width: 100%; /* Full width sidebar on small screens */
+    padding: 0.5rem; /* Reduce padding */
+  }
+
+  .mainContent {
+    padding: 0.5rem; /* Reduce padding */
+  }
+
+  .calendarContainer {
+    align-items: center; /* Center content on small screens */
+  }
+}
