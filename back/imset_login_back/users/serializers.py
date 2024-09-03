@@ -49,6 +49,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        if instance.picture:
+            data['picture'] = instance.picture.url  
         if instance.role == 'teacher':
             data['classes_name'] = [cls.name for cls in instance.classes_name.all()]
         elif instance.role == 'student':

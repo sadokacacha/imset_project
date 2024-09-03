@@ -5,7 +5,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import AuthContext, { AuthContextType } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
-import styles from "./Profile.module.css";
+import styles from './Profile.module.css';
 
 type UserProfile = {
   first_name: string;
@@ -18,14 +18,7 @@ type UserProfile = {
   picture?: string;
 };
 
-interface ProfileProps {
-  schoolName?: string;
-  description?: string;
-  levels?: string[];
-  logoUrl?: string;
-}
-
-const Profile: React.FC<ProfileProps> = ({ schoolName, description, levels = [], logoUrl }) => {
+const Profile: React.FC = () => {
   const { logout } = useContext(AuthContext) as AuthContextType;
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
@@ -57,48 +50,48 @@ const Profile: React.FC<ProfileProps> = ({ schoolName, description, levels = [],
   return (
     <div className={styles.container}>
       <Navbar /> {/* Left side Navbar */}
-      <div className={styles.content}> {/* Right side Profile Content */}
-      <div className={styles.profileCard}>
-        <h1>Profile</h1>
-        {profile.picture && (
-          <img
-            src={profile.picture}
-            alt={`${profile.first_name} ${profile.last_name}`}
-          />
-        )}
-        <div >
-          <p>
-            <strong>First Name:</strong> {profile.first_name}
-          </p>
-          <p>
-            <strong>Last Name:</strong> {profile.last_name}
-          </p>
-          <p>
-            <strong>Email:</strong> {profile.email}
-          </p>
-          {profile.date_of_birth && (
-            <p>
-              <strong>Date of Birth:</strong> {profile.date_of_birth}
-            </p>
+      <div className={styles.content}>
+        {/* Right side Profile Content */}
+        <div className={styles.profileCard}>
+          <h1>Profile</h1>
+          {profile.picture && (
+            <img
+              src={`http://localhost:8000${profile.picture}`} // Media URL prefix removed
+              alt={`${profile.first_name} ${profile.last_name}`}
+              className={styles.profilePicture}
+            />
           )}
-          {profile.id_card_or_passport && (
+          <div>
             <p>
-              <strong>ID/Passport:</strong> {profile.id_card_or_passport}
+              <strong>First Name:</strong> {profile.first_name}
             </p>
-          )}
-          {profile.phone && (
             <p>
-              <strong>Phone:</strong> {profile.phone}
+              <strong>Last Name:</strong> {profile.last_name}
             </p>
-          )}
-          <p>
-            <strong>Role:</strong> {profile.role}
-          </p>
+            <p>
+              <strong>Email:</strong> {profile.email}
+            </p>
+            {profile.date_of_birth && (
+              <p>
+                <strong>Date of Birth:</strong> {profile.date_of_birth}
+              </p>
+            )}
+            {profile.id_card_or_passport && (
+              <p>
+                <strong>ID/Passport:</strong> {profile.id_card_or_passport}
+              </p>
+            )}
+            {profile.phone && (
+              <p>
+                <strong>Phone:</strong> {profile.phone}
+              </p>
+            )}
+            <p>
+              <strong>Role:</strong> {profile.role}
+            </p>
+          </div>
         </div>
-
-        {/* Section for Educational System Profile */}
       </div>
-    </div>
     </div>
   );
 };

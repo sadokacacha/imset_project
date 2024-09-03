@@ -3,7 +3,7 @@ import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { User } from '../../context/AuthContext';
+import { User } from '../../../context/AuthContext';
 
 interface EditUserModalProps {
   show: boolean;

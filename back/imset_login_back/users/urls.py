@@ -19,7 +19,8 @@ from .views import (
     StudentUploadedFilesView,
     StudentFileDownloadView,
 )
-
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/user/', UserDetailView.as_view(), name='user_detail'),
@@ -50,4 +51,5 @@ urlpatterns = [
     path('api/users/<int:user_id>/', UserDetailView.as_view(), name='user-detail'),  # For specific user
     path('api/users/me/', UserDetailView.as_view(), name='user-detail-self'),  # For current logged-in user
 
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
