@@ -11,8 +11,11 @@
 # testing
 /coverage
 
+<<<<<<< HEAD
+=======
 # database
 back/imset_login_back/db.sqlite3
+>>>>>>> ce291b2d906ead87d6e3ec88148b5c1a83fd82ac
 
 # next.js
 /.next/
