@@ -73,6 +73,7 @@
   .nav ul {
     flex-direction: column;
     align-items: center;
+    transform: translateX(6rem);
   }
 
   .logo img {
