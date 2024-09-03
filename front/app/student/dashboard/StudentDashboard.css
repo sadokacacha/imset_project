@@ -1,0 +1,70 @@
+.container1 {
+    display: flex;
+    height: 100vh;
+    background-color: #f0f2f5;
+  }
+
+  .content2 {
+    padding: 40px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+
+
+  
+  .dashboard-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .course-row {
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  
+  .course-name {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .course-date,
+  .course-matiere,
+  .course-files-count {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #6c757d;
+  }
+  
+  .file-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .file-name {
+    margin-left: 10px;
+    flex-grow: 1;
+  }
+  
+  .download-button {
+    background-color: #4a0000;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .download-button:hover {
+    background-color: #7e0000;
+  }
+  
+  @media (max-width: 768px) {
+    .content2 {
+      grid-template-columns: 1fr;
+    }
+  }
+  

@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import Navbar from '../../components/Navbar'
+import Navbar from '../../components/Navbar';
+import  "./StudentDashboard.css";
 import { Modal, Button } from 'react-bootstrap';
 import {
   FaFilePdf,
@@ -105,23 +106,16 @@ const StudentDashboard: React.FC = () => {
     }
   };
   return (
-    <div>
+    <div className='container1'>
       <Navbar/>
-      <h2>Your Class Files</h2>
-      <div>
+      <div className='content2'>
         {uploadedFiles.map((group, index) => (
-          <div
+          <div className='course-row'
             key={index}
-            style={{
-              border: '1px solid #ccc',
-              padding: '10px',
-              margin: '10px 0',
-              cursor: 'pointer',
-            }}
             onClick={() => openFileGroup(group)}
           >
-            <h3>{group.name}</h3>
-            <p>{group.files.length} files</p>
+            <h3 className='course-name' >{group.name}</h3>
+            <p className='course-files-count' >{group.files.length} files</p>
           </div>
         ))}
       </div>
@@ -132,13 +126,12 @@ const StudentDashboard: React.FC = () => {
         </Modal.Header>
         <Modal.Body>
           {currentGroup?.files.map((file, index) => (
-            <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
+            <div  className='file-row' key={index} >
               {getIconForFileType(file.file)}
-              <span style={{ marginLeft: '10px' }}>
+              <span className='file-name'>
                 {file.file.split('/').pop()}
               </span>
-              <button
-                style={{ marginLeft: 'auto' }}
+              <button className='download-button'
                 onClick={() =>
                   downloadFile(file.id, file.file.split('/').pop()!)
                 }
