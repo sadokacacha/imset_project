@@ -113,6 +113,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+    
 class UploadedFileSerializer(serializers.ModelSerializer):
     file_name = serializers.SerializerMethodField()
     file_extension = serializers.SerializerMethodField()

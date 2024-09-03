@@ -1,7 +1,7 @@
-import React, { useContext } from 'react';
-import Link from 'next/link';
-import AuthContext, { AuthContextType } from '../context/AuthContext';
-import './Navbar.css';
+import React, { useContext } from "react";
+import Link from "next/link";
+import AuthContext, { AuthContextType } from "../context/AuthContext";
+import "./Navbar.css";
 
 const Navbar: React.FC = () => {
   const { user, logout } = useContext(AuthContext) as AuthContextType;
@@ -19,7 +19,7 @@ const Navbar: React.FC = () => {
             </Link>
           </li>
 
-          {user?.role === 'admin' && (
+          {user?.role === "admin" && (
             <>
               <li>
                 <Link className="link" href="/admin/dashboard/">
@@ -35,33 +35,21 @@ const Navbar: React.FC = () => {
             </>
           )}
 
-          {user?.role === 'teacher' && (
+          {user?.role === "teacher" && (
             <>
               <li>
                 <Link className="link" href="/teacher/dashboard">
                   HOME
                 </Link>
               </li>
-
-              <li>
-                <Link className="link" href="/teacher/dashboard/AddFiles">
-                  add files
-                </Link>
-              </li>
             </>
           )}
 
-          {user?.role === 'student' && (
+          {user?.role === "student" && (
             <>
               <li>
                 <Link className="link" href="/student/dashboard">
                   HOME
-                </Link>
-              </li>
-    
-              <li>
-                <Link className="link" href="/student/dashboard/ViewResume">
-                  Resume
                 </Link>
               </li>
 
