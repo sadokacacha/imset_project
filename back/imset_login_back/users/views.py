@@ -54,13 +54,16 @@ class UserDetailView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class AdminDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         if request.user.role != 'admin':
             return Response({'error': 'You do not have permission to access this resource.'}, status=403)
+
+        admin_count = User.objects.filter(role='admin').count()
+        teacher_count = User.objects.filter(role='teacher').count()
+        student_count = User.objects.filter(role='student').count()
 
         admins = User.objects.filter(role='admin')
         teachers = User.objects.filter(role='teacher').prefetch_related('classes_name')
@@ -71,11 +74,14 @@ class AdminDashboardView(APIView):
         students_serializer = UserSerializer(students, many=True)
 
         return Response({
+            'admin_count': admin_count,
+            'teacher_count': teacher_count,
+            'student_count': student_count,
             'admins': admins_serializer.data,
             'teachers': teachers_serializer.data,
             'students': students_serializer.data,
         })
-    
+
 class UserCreateView(APIView):
     permission_classes = [IsAuthenticated]
 

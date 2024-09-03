@@ -49,14 +49,13 @@ const Profile: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <Navbar /> {/* Left side Navbar */}
+      <Navbar /> 
       <div className={styles.content}>
-        {/* Right side Profile Content */}
         <div className={styles.profileCard}>
           <h1>Profile</h1>
           {profile.picture && (
             <img
-              src={`http://localhost:8000${profile.picture}`} // Media URL prefix removed
+              src={`http://localhost:8000${profile.picture}`} 
               alt={`${profile.first_name} ${profile.last_name}`}
               className={styles.profilePicture}
             />
