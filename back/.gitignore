@@ -11,6 +11,11 @@
 # testing
 /coverage
 
+
+
+#data base 
+back/imset_login_back/db.sqlite3
+
 # next.js
 /.next/
 /out/
