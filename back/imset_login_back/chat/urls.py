@@ -1,7 +1,10 @@
 from django.urls import path
-from . import views
-from .views import handle_conversation
+from .views import CustomTokenObtainPairView, handle_conversation
 
 urlpatterns = [
-    path('chatbot/', handle_conversation, name='handle_conversation'),
+    # JWT token endpoint
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+
+    # Chatbot interaction endpoint
+    path('chatbot/', handle_conversation, name='chatbot_interaction'),
 ]

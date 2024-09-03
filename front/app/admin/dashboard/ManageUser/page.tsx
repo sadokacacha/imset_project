@@ -45,6 +45,7 @@ const ManageUser: React.FC = () => {
   const [admins, setAdmins] = useState<User[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
   const [students, setStudents] = useState<User[]>([]);
+  
   const [classes, setClasses] = useState<ClassName[]>([]);
   const [newUser, setNewUser] = useState<NewUser>({
     email: '',
@@ -103,7 +104,7 @@ const ManageUser: React.FC = () => {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
       ]);
-
+  
       setAdmins(dashboardResponse.data.admins || []);
       setTeachers(dashboardResponse.data.teachers || []);
       setStudents(dashboardResponse.data.students || []);
@@ -112,13 +113,7 @@ const ManageUser: React.FC = () => {
       console.error('Failed to fetch dashboard data', error);
     }
   };
-
-  // Function to open the edit modal
-  const openEditModal = (user: User) => {
-    setSelectedUser(user);
-    setIsEditModalOpen(true);
-  };
-
+  
   const getClassNamesByIds = (ids: number[] = []): string[] => {
     return ids
       .map((id) => classes.find((cls) => cls.id === id)?.name)
@@ -130,6 +125,13 @@ const ManageUser: React.FC = () => {
     if (id === undefined) return undefined;
     return classes.find((cls) => cls.id === id)?.name;
   };
+
+  // Function to open the edit modal
+  const openEditModal = (user: User) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
+  };
+
 
   const deleteUser = async (userId: number) => {
     try {
@@ -146,24 +148,22 @@ const ManageUser: React.FC = () => {
     }
   };
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value, files } = e.target as HTMLInputElement &
-      HTMLSelectElement;
-    if (name === 'picture' && files) {
-      setNewUser({ ...newUser, picture: files[0] });
-    } else if (name === 'classes_name') {
-      const selectedOptions = Array.from(
-        (e.target as HTMLSelectElement).selectedOptions,
-        (option) => parseInt(option.value)
-      );
-      setNewUser({ ...newUser, classes_name: selectedOptions });
-    } else {
-      setNewUser({ ...newUser, [name]: value });
-    }
-  };
-
+const handleChange = (
+  e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+) => {
+  const { name, value, files } = e.target as HTMLInputElement & HTMLSelectElement;
+  if (name === 'picture' && files) {
+    setNewUser({ ...newUser, picture: files[0] });
+  } else if (name === 'classes_name') {
+    const selectedOptions = Array.from(
+      (e.target as HTMLSelectElement).selectedOptions,
+      (option) => parseInt(option.value)
+    );
+    setNewUser({ ...newUser, classes_name: selectedOptions });
+  } else {
+    setNewUser({ ...newUser, [name]: value });
+  }
+};
   const handleFilterChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -197,61 +197,61 @@ const ManageUser: React.FC = () => {
       );
     });
   };
-  
+
   const createUser = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const accessToken = Cookies.get('access_token');
+        const accessToken = Cookies.get('access_token');
 
-      const formData = new FormData();
-      Object.keys(newUser).forEach((key) => {
-        const value = newUser[key as keyof NewUser];
-        if (Array.isArray(value)) {
-          value.forEach((v) => formData.append(key, v.toString()));
-        } else if (value) {
-          formData.append(key, value as string | Blob);
-        }
-      });
+        const formData = new FormData();
+        Object.keys(newUser).forEach((key) => {
+            const value = newUser[key as keyof NewUser];
+            if (Array.isArray(value)) {
+                value.forEach((v) => formData.append(key, v.toString()));
+            } else if (value) {
+                formData.append(key, value as string | Blob);
+            }
+        });
 
-      console.log('Form data being sent:', Array.from(formData.entries())); // Ensure password is included
+        console.log('Form data being sent:', Array.from(formData.entries()));
 
-      await axios.post(
-        'http://localhost:8000/api/admin/create-user/',
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-
-      fetchDashboardData();
-      setNewUser({
-        email: '',
-        role: '',
-        password: '', // Reset after creation
-        first_name: '',
-        last_name: '',
-        date_of_birth: '',
-        id_card_or_passport: '',
-        phone: '',
-        picture: null,
-        classes_name: [],
-        class_name: '',
-      });
-      setIsModalOpen(false);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Failed to create user', error.response?.data);
-        alert(
-          JSON.stringify(error.response?.data.errors || error.response?.data)
+        await axios.post(
+            'http://localhost:8000/api/admin/create-user/',
+            formData,
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
         );
-      } else {
-        console.error('Failed to create user', error);
-      }
+
+        fetchDashboardData();
+        setNewUser({
+            email: '',
+            role: '',
+            password: '',
+            first_name: '',
+            last_name: '',
+            date_of_birth: '',  
+            id_card_or_passport: '', 
+            phone: '',  
+            picture: null,
+            classes_name: [],
+            class_name: '',
+        });
+        setIsModalOpen(false);
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error('Failed to create user', error.response?.data);
+            alert(
+                JSON.stringify(error.response?.data.errors || error.response?.data)
+            );
+        } else {
+            console.error('Failed to create user', error);
+        }
     }
-  };
+};
 
   useEffect(() => {
     if (user && user.role === 'admin') {
@@ -291,27 +291,27 @@ const ManageUser: React.FC = () => {
     }
   };
 
+
   const openUserModal = (user: User) => {
     setSelectedUser(user);
     setIsUserModalOpen(true); // Corrected this line
   };
-
   const renderTableRows = (users: User[]): ReactNode => {
     return users.map((user) => (
       <tr key={user.id}>
         <td>{user.id}</td>
-        <td>
-          {user.first_name} {user.last_name}
-        </td>
+        <td>{`${user.first_name} ${user.last_name}`}</td>
         <td>{user.email}</td>
         <td>{user.date_of_birth}</td>
+        <td>{user.phone}</td>
+        <td>{user.id_card_or_passport}</td>
+
         <td>
           {user.role === 'teacher'
-            ? getClassNamesByIds(user.classes_name).join(', ')
+            ? getClassNamesByIds(user.classes_name)
+            : user.role === 'student'
+            ? getClassNameById(user.class_name)
             : ''}
-        </td>
-        <td>
-          {user.role === 'student' ? getClassNameById(user.class_name) : ''}
         </td>
         <td>
           <button onClick={() => openEditModal(user)}>Edit</button>
@@ -321,7 +321,7 @@ const ManageUser: React.FC = () => {
       </tr>
     ));
   };
-
+  
   return (
     <div>
       <Navbar />
@@ -396,6 +396,8 @@ const ManageUser: React.FC = () => {
                   <th>Name</th>
                   <th>Email</th>
                   <th>Date of Birth</th>
+                  <th>phone</th>
+                  <th>ID CARD</th>
                   <th>Class</th>
                   <th>Action</th>
                 </tr>

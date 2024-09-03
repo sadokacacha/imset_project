@@ -104,6 +104,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             name="first_name"
             value={editedUser.first_name}
             onChange={handleChange}
+            placeholder='First name'
             required
           />
           <input
@@ -111,6 +112,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             name="last_name"
             value={editedUser.last_name}
             onChange={handleChange}
+            placeholder='Last name'
+
             required
           />
           <input
@@ -118,6 +121,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             name="email"
             value={editedUser.email}
             onChange={handleChange}
+            placeholder='email'
             required
           />
           <input
@@ -125,6 +129,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             name="id_card_or_passport"
             value={editedUser.id_card_or_passport}
             onChange={handleChange}
+            placeholder='id_card_or_passport'
             required
           />
           <input
@@ -132,6 +137,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             name="phone"
             value={editedUser.phone}
             onChange={handleChange}
+            placeholder='phone'
             required
           />
           <input

@@ -1,8 +1,11 @@
 "use client";
-import { useState, FormEvent, ChangeEvent } from "react";
+
+import { useState, useContext, FormEvent, ChangeEvent } from "react";
 import styles from "./Dashboard.module.css";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
+import Cookies from "js-cookie";
 import Navbar from "../components/Navbar";
+import AuthContext from "../context/AuthContext";
 
 interface ChatLogEntry {
   question: string;
@@ -17,82 +20,48 @@ export default function Speakpdf() {
   const [error, setError] = useState<string>("");
   const [isChatbotOpen, setIsChatbotOpen] = useState<boolean>(false);
 
-  // Function to refresh the token
-  const refreshToken = async (): Promise<string | null> => {
+  const authContext = useContext(AuthContext);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    let token = Cookies.get("access_token");
+  
+    if (!token) {
+      setError("No access token available. Please log in again.");
+      authContext?.logout();
+      return;
+    }
+
     try {
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (!refreshToken) {
-        setError("No refresh token available. Please log in again.");
-        return null;
-      }
+      const res = await axios.post(
+        "http://localhost:8000/chatbot/",
+        { question: userInput, context },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      const response = await axios.post("http://localhost:8000/api/token/refresh/", {
-        refresh: refreshToken,
-      });
-
-      const newAccessToken = response.data.access;
-      localStorage.setItem("accessToken", newAccessToken);
-      return newAccessToken;
+      setResponse(res.data.response);
+      setContext(res.data.context);
+      setChatLog((prevChatLog) => [
+        ...prevChatLog,
+        { question: userInput, response: res.data.response },
+      ]);
+      setUserInput(""); // Clear input field after submission
     } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 401) {
-        setError("Failed to refresh token. Please log in again.");
+      if (error instanceof axios.AxiosError && error.response?.status === 401) {
+        // The Axios interceptor will handle token refresh, no need to manually call refreshToken
+        setError("Unauthorized: Please log in again.");
       } else {
-        setError("An unknown error occurred while refreshing the token.");
+        setError("Failed to communicate with Django API.");
       }
-      console.error("Failed to refresh token", error);
-      return null;
+      console.error("Error:", error);
     }
   };
 
-  // Handle form submission
-  // Function to handle form submission
-const handleSubmit = async (e: FormEvent) => {
-  e.preventDefault();
-
-  let token = localStorage.getItem("accessToken");
-
-  try {
-    const res = await axios.post(
-      "http://localhost:8000/chatbot/",
-      { question: userInput, context },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    
-
-    setResponse(res.data.response);
-    setContext(res.data.context);
-    setChatLog((prevChatLog) => [
-      ...prevChatLog,
-      { question: userInput, response: res.data.response },
-    ]);
-    setUserInput(""); // Clear input field after submission
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      if (error.response?.status === 401) {
-        // Token might be expired, attempt to refresh it
-        token = await refreshToken();
-        if (token) {
-          handleSubmit(e);
-        } else {
-          setError("Unauthorized: Please log in again.");
-        }
-      } else {
-        setError("Failed to communicate with Django API");
-      }
-    } else {
-      setError("An unknown error occurred.");
-    }
-    console.error("Error:", error);
-  }
-};
-
-
-  // Handle input change
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUserInput(e.target.value);
   };
 
-  // Toggle chatbot visibility
   const toggleChatbot = () => {
     setIsChatbotOpen((prevState) => !prevState);
   };

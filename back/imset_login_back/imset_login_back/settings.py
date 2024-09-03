@@ -29,9 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'back/imset_login_back/profile_pictures')
-
-# Application definition
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 

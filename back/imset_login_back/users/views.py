@@ -130,9 +130,6 @@ class ClassListView(APIView):
 
 
 
-
-
-
 class TeacherDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 

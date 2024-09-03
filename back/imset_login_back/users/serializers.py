@@ -52,9 +52,12 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'picture',
-            'password',          # Include password in the fields
+            'password',          
             'classes_name',
-            'class_name'
+            'class_name',
+            'date_of_birth',  
+            'id_card_or_passport',  
+            'phone' 
         ]
 
     def to_representation(self, instance):
@@ -62,11 +65,10 @@ class UserSerializer(serializers.ModelSerializer):
         if instance.picture:
             data['picture'] = instance.picture.url  
         if instance.role == 'teacher':
-            data['classes_name'] = [cls.name for cls in instance.classes_name.all()]
+            data['classes_name'] = ClassNameSerializer(instance.classes_name.all(), many=True).data
         elif instance.role == 'student':
-            data['class_name'] = instance.class_name.name if instance.class_name else None
+            data['class_name'] = ClassNameSerializer(instance.class_name).data if instance.class_name else None
         return data
-
     def create(self, validated_data):
         password = validated_data.pop('password', None)  # Extract password
         classes_name = validated_data.pop('classes_name', [])
