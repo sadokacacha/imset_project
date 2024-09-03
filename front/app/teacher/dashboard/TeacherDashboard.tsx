@@ -293,14 +293,14 @@ const TeacherDashboard: React.FC = () => {
           >
             <h3>{group.name}</h3>
             <p>{group.files.length} files</p>
-            <button
+            <button 
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteGroup(group.name);
               }}
             >
               <FaTrash />
-            </button>
+            .</button>
           </div>
         ))}
       </div>
