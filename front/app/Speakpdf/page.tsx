@@ -5,11 +5,7 @@ import styles from "./Dashboard.module.css";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Navbar from "../components/Navbar";
-<<<<<<< HEAD
 import AuthContext from "../context/AuthContext";
-=======
-// import "./Navbar.css";
->>>>>>> ce291b2d906ead87d6e3ec88148b5c1a83fd82ac
 
 interface ChatLogEntry {
   question: string;
@@ -62,51 +58,6 @@ export default function Speakpdf() {
     }
   };
 
-<<<<<<< HEAD
-=======
-  // Handle form submission
-  // Function to handle form submission
-const handleSubmit = async (e: FormEvent) => {
-  e.preventDefault();
-
-  let token = localStorage.getItem("accessToken");
-
-  try {
-    const res = await axios.post(
-      "http://localhost:8000/chatbot/",
-      { question: userInput, context },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setResponse(res.data.response);
-    setContext(res.data.context);
-    setChatLog((prevChatLog) => [
-      ...prevChatLog,
-      { question: userInput, response: res.data.response },
-    ]);
-    setUserInput(""); // Clear input field after submission
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      if (error.response?.status === 401) {
-        // Token might be expired, attempt to refresh it
-        token = await refreshToken();
-        if (token) {
-          handleSubmit(e);
-        } else {
-          setError("Unauthorized: Please log in again.");
-        }
-      } else {
-        setError("Failed to communicate with Django API");
-      }
-    } else {
-      setError("An unknown error occurred.");
-    }
-    console.error("Error:", error);
-  }
-};
-
-
-  // Handle input change
->>>>>>> ce291b2d906ead87d6e3ec88148b5c1a83fd82ac
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUserInput(e.target.value);
   };

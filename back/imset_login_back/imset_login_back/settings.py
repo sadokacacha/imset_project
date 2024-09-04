@@ -30,11 +30,6 @@ ALLOWED_HOSTS = []
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-<<<<<<< HEAD
-=======
-
-# Application definition
->>>>>>> ce291b2d906ead87d6e3ec88148b5c1a83fd82ac
 
 
 
