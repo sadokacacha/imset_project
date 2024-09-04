@@ -2,9 +2,10 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
+from users.serializers import CustomTokenObtainPairSerializer  
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
-from users.serializers import CustomTokenObtainPairSerializer  # Import from users app
+
 
 # Custom Token View
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -39,16 +40,10 @@ def handle_conversation(request):
     try:
         # Generate the response using the AI model
         result = chain.invoke({"context": context, "question": user_input})
-
-        # Update the context to include the new interaction
-        context += f"\nUser: {user_input}\n{AI_NAME}: {result}"
-
-        return JsonResponse({"response": result, "context": context})
-
+        return JsonResponse({
+            "response": result["answer"],
+            "context": result["context"]
+    })
     except Exception as e:
-        # Log the error for debugging purposes
-        print(f"Error in handle_conversation: {e}")
-        return JsonResponse(
-            {"error": "An error occurred while processing your request."},
-            status=500
-        )
+        print(f"Error: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)

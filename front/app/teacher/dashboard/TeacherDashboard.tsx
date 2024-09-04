@@ -238,6 +238,7 @@ const TeacherDashboard: React.FC = () => {
   return (
     <div>
       <Navbar />
+      
       <form
         onSubmit={(e) => {
           e.preventDefault();

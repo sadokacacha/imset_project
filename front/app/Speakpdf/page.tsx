@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useContext, FormEvent, ChangeEvent } from "react";
 import styles from "./Dashboard.module.css";
@@ -13,11 +13,11 @@ interface ChatLogEntry {
 }
 
 export default function Speakpdf() {
-  const [userInput, setUserInput] = useState<string>("");
-  const [context, setContext] = useState<string>("");
+  const [userInput, setUserInput] = useState<string>('');
+  const [context, setContext] = useState<string>('');
   const [chatLog, setChatLog] = useState<ChatLogEntry[]>([]);
-  const [response, setResponse] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [response, setResponse] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const [isChatbotOpen, setIsChatbotOpen] = useState<boolean>(false);
 
   const authContext = useContext(AuthContext);
@@ -25,37 +25,45 @@ export default function Speakpdf() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    let token = Cookies.get("access_token");
-  
+    let token = Cookies.get('access_token');
+
     if (!token) {
-      setError("No access token available. Please log in again.");
+      setError('No access token available. Please log in again.');
       authContext?.logout();
       return;
     }
 
-    try {
-      const res = await axios.post(
-        "http://localhost:8000/chatbot/",
-        { question: userInput, context },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+try {
+  const res = await axios.post(
+    'http://localhost:8000/chat/chatbot/',
+    { question: userInput, context },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 
-      setResponse(res.data.response);
-      setContext(res.data.context);
-      setChatLog((prevChatLog) => [
-        ...prevChatLog,
-        { question: userInput, response: res.data.response },
-      ]);
-      setUserInput(""); // Clear input field after submission
-    } catch (error) {
-      if (error instanceof axios.AxiosError && error.response?.status === 401) {
-        // The Axios interceptor will handle token refresh, no need to manually call refreshToken
-        setError("Unauthorized: Please log in again.");
-      } else {
-        setError("Failed to communicate with Django API.");
-      }
-      console.error("Error:", error);
+  setResponse(res.data.response);
+  setContext(res.data.context);
+  setChatLog((prevChatLog) => [
+    ...prevChatLog,
+    { question: userInput, response: res.data.response },
+  ]);
+  setUserInput(''); // Clear input field after submission
+} catch (error) {
+  if (axios.isAxiosError(error)) {
+    if (error.response?.status === 401) {
+      setError('Unauthorized: Please log in again.');
+      authContext?.logout();
+    } else if (error.response?.status === 500) {
+      setError('Server error: Please try again later.');
+    } else {
+      setError('An unexpected error occurred.');
     }
+    console.error('Axios Error:', error.response?.data);
+  } else {
+    setError('Failed to communicate with Django API.');
+    console.error('Unexpected Error:', error);
+  }
+}
+
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +84,7 @@ export default function Speakpdf() {
         </header>
         <div className={styles.profileCard2}>
           <button className={styles.toggleButton} onClick={toggleChatbot}>
-            {isChatbotOpen ? "Close Chat" : "Open Chat"}
+            {isChatbotOpen ? 'Close Chat' : 'Open Chat'}
           </button>
           {isChatbotOpen && (
             <div className={styles.chatbot}>
@@ -99,13 +107,13 @@ export default function Speakpdf() {
                   value={userInput}
                   onChange={handleInputChange}
                   placeholder="Type your question"
-                  required                  
+                  required
                 />
-                 <button className={styles.envoyer} type="submit">
+                <button className={styles.envoyer} type="submit">
                   Send
                 </button>
               </form>
-              {error && <p style={{ color: "red" }}>{error}</p>}
+              {error && <p style={{ color: 'red' }}>{error}</p>}
             </div>
           )}
         </div>
