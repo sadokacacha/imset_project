@@ -33,28 +33,37 @@ export default function Speakpdf() {
       return;
     }
 
-    try {
-     const res = await axios.post(
-       'http://localhost:8000/chat/chatbot/', 
-       { question: userInput, context },
-       { headers: { Authorization: `Bearer ${token}` } }
-     );
+try {
+  const res = await axios.post(
+    'http://localhost:8000/chat/chatbot/',
+    { question: userInput, context },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 
-      setResponse(res.data.response);
-      setContext(res.data.context);
-      setChatLog((prevChatLog) => [
-        ...prevChatLog,
-        { question: userInput, response: res.data.response },
-      ]);
-      setUserInput(''); // Clear input field after submission
-    } catch (error) {
-      if (error instanceof axios.AxiosError && error.response?.status === 401) {
-        setError('Unauthorized: Please log in again.');
-      } else {
-        setError('Failed to communicate with Django API.');
-      }
-      console.error('Error:', error);
+  setResponse(res.data.response);
+  setContext(res.data.context);
+  setChatLog((prevChatLog) => [
+    ...prevChatLog,
+    { question: userInput, response: res.data.response },
+  ]);
+  setUserInput(''); // Clear input field after submission
+} catch (error) {
+  if (axios.isAxiosError(error)) {
+    if (error.response?.status === 401) {
+      setError('Unauthorized: Please log in again.');
+      authContext?.logout();
+    } else if (error.response?.status === 500) {
+      setError('Server error: Please try again later.');
+    } else {
+      setError('An unexpected error occurred.');
     }
+    console.error('Axios Error:', error.response?.data);
+  } else {
+    setError('Failed to communicate with Django API.');
+    console.error('Unexpected Error:', error);
+  }
+}
+
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {

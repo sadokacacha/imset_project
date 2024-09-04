@@ -2,9 +2,10 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
+from users.serializers import CustomTokenObtainPairSerializer  
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
-from users.serializers import CustomTokenObtainPairSerializer  # Import from users app
+
 
 # Custom Token View
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -42,6 +43,7 @@ def handle_conversation(request):
         return JsonResponse({
             "response": result["answer"],
             "context": result["context"]
-        })
+    })
     except Exception as e:
+        print(f"Error: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
