@@ -39,16 +39,9 @@ def handle_conversation(request):
     try:
         # Generate the response using the AI model
         result = chain.invoke({"context": context, "question": user_input})
-
-        # Update the context to include the new interaction
-        context += f"\nUser: {user_input}\n{AI_NAME}: {result}"
-
-        return JsonResponse({"response": result, "context": context})
-
+        return JsonResponse({
+            "response": result["answer"],
+            "context": result["context"]
+        })
     except Exception as e:
-        # Log the error for debugging purposes
-        print(f"Error in handle_conversation: {e}")
-        return JsonResponse(
-            {"error": "An error occurred while processing your request."},
-            status=500
-        )
+        return JsonResponse({"error": str(e)}, status=500)
