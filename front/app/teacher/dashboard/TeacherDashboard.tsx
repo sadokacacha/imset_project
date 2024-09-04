@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import Navbar from '../../components/Navbar';
+import  "./TeacherDashboard.css";
 import { Modal, Button } from 'react-bootstrap';
 import {
   FaFilePdf,
@@ -236,17 +237,33 @@ const TeacherDashboard: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="container">
       <Navbar />
       
-      <form
+      <form  className="header"
         onSubmit={(e) => {
           e.preventDefault();
           setShowConfirmation(true);
         }}
       >
         {/* File Input and Class Selection Fields */}
-        <input type="file" multiple onChange={handleFileChange} />
+        {/* <input type="file"  className="file-input" multiple onChange={handleFileChange} /> */}
+        <div>
+        <div className="custom-file-upload">
+      <input
+        type="file"
+        multiple
+        id="fileInput"
+        className="file-input"
+        onChange={handleFileChange}
+      />
+      <label htmlFor="fileInput" className="file-label">
+        <span className="file-button">Choose Files</span>
+      </label>
+    </div>
+    </div>
+
+
 
         <input
           type="text"
@@ -257,12 +274,14 @@ const TeacherDashboard: React.FC = () => {
         />
 
         <select
+          className="custom-select"
           multiple
           value={selectedClasses}
           onChange={handleClassChange}
           required
         >
-          <option value="">Select Classes</option>
+          
+          <option  value="">Select Classes</option>
           {classes.map((cls) => (
             <option key={cls.id} value={cls.id}>
               {cls.name}
@@ -282,29 +301,69 @@ const TeacherDashboard: React.FC = () => {
           ))}
         </ul>
 
-        <button type="submit">Confirm Upload</button>
+        <button  className="upload-btn" type="submit">Confirm Upload</button>
       </form>
 
       <h2>Your Files</h2>
+{/* 
       <div>
+      <tbody>
+        
         {uploadedFiles.map((group, index) => (
+          <table>
           <div
+           className="group-card"
             key={index} // Ensure unique key
             onClick={() => openFileGroup(group)} // Set the group as currentGroup
           >
             <h3>{group.name}</h3>
             <p>{group.files.length} files</p>
-            <button 
+            <button className="action-btn"
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteGroup(group.name);
               }}
             >
               <FaTrash />
-            .</button>
+            </button>
           </div>
+          </table>
         ))}
-      </div>
+        </tbody>
+      </div> */}
+
+
+<div className="table-container">
+  <table className="file-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Files Count</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {uploadedFiles.map((group, index) => (
+        <tr key={index} onClick={() => openFileGroup(group)} className="table-row">
+          <td>{group.name}</td>
+          <td>{group.files.length}</td>
+          <td>
+            <button className="action-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteGroup(group.name);
+              }}
+            >
+              <FaTrash />
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+
 
       {/* Modal for File Group */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
@@ -316,7 +375,7 @@ const TeacherDashboard: React.FC = () => {
             {currentGroup?.files.map((file) => (
               <li key={file.id}>
                 {getIconForFileType(file.file)} {file.file}
-                <button
+                <button className="action-btn"
                   onClick={() => downloadFile(file.id, file.file)}
                 >
                   Download
