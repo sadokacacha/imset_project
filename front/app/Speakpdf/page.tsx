@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useContext, FormEvent, ChangeEvent } from 'react';
-import styles from './Dashboard.module.css';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import Navbar from '../components/Navbar';
-import AuthContext from '../context/AuthContext';
+import { useState, useContext, FormEvent, ChangeEvent } from "react";
+import styles from "./Dashboard.module.css";
+import axios from "axios";
+import Cookies from "js-cookie";
+import Navbar from "../components/Navbar";
+import AuthContext from "../context/AuthContext";
 
 interface ChatLogEntry {
   question: string;
