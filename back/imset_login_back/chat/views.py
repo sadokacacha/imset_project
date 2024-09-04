@@ -6,7 +6,6 @@ from users.serializers import CustomTokenObtainPairSerializer
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
 
-
 # Custom Token View
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -40,10 +39,18 @@ def handle_conversation(request):
     try:
         # Generate the response using the AI model
         result = chain.invoke({"context": context, "question": user_input})
-        return JsonResponse({
-            "response": result["answer"],
-            "context": result["context"]
-    })
+        print(f"Result: {result}")  # Inspect the structure
+
+        # Check if the result is a string (as per the previous code assumption)
+        if isinstance(result, str):
+            # Update the context with the AI response
+            context += f"\nUser: {user_input}\n{AI_NAME}: {result}"
+            return JsonResponse({
+                "response": result,
+                "context": context
+            })
+        else:
+            return JsonResponse({"error": "Unexpected result format"}, status=500)
     except Exception as e:
         print(f"Error: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
