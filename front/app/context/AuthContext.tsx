@@ -83,6 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 
   // Define the login function
+
   const login = async (credentials: { email: string; password: string }) => {
     try {
       const response = await axios.post(
@@ -119,6 +120,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  
   useEffect(() => {
     const checkAuth = async () => {
       setIsLoading(true);
